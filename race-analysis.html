@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race Analysis - Hyrox Training</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">Hyrox Training Plan</h1>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="training-plan.html">Training Plan</a></li>
+                <li><a href="nutrition.html">Nutrition</a></li>
+                <li><a href="race-analysis.html" class="active">Race Analysis</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="hero">
+            <h1>Race Performance Analysis</h1>
+            <h2>Previous Hyrox Results Breakdown</h2>
+        </header>
+
+        <section class="analysis-section">
+            <h2>Overall Performance Summary</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+                <div class="card">
+                    <h3>Total Time</h3>
+                    <p style="font-size: 2rem; color: var(--primary-color); font-weight: bold; margin: 0.5rem 0;">1:40:32</p>
+                    <p>Target: Sub-90:00</p>
+                </div>
+                <div class="card">
+                    <h3>Time to Find</h3>
+                    <p style="font-size: 2rem; color: var(--success); font-weight: bold; margin: 0.5rem 0;">10:32+</p>
+                    <p>To achieve sub-90 goal</p>
+                </div>
+                <div class="card">
+                    <h3>Running Time</h3>
+                    <p style="font-size: 2rem; color: var(--primary-color); font-weight: bold; margin: 0.5rem 0;">~48:00</p>
+                    <p>8km total (8 runs)</p>
+                </div>
+                <div class="card">
+                    <h3>Stations Time</h3>
+                    <p style="font-size: 2rem; color: var(--primary-color); font-weight: bold; margin: 0.5rem 0;">~41:00</p>
+                    <p>All 8 stations combined</p>
+                </div>
+                <div class="card">
+                    <h3>Transitions</h3>
+                    <p style="font-size: 2rem; color: var(--warning); font-weight: bold; margin: 0.5rem 0;">11:39</p>
+                    <p>Major opportunity!</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="analysis-section">
+            <h2>Station-by-Station Breakdown</h2>
+            <div style="overflow-x: auto;">
+                <table class="station-table">
+                    <thead>
+                        <tr>
+                            <th>Station</th>
+                            <th>Current Time</th>
+                            <th>Target Time</th>
+                            <th>Time Savings</th>
+                            <th>Priority</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1000m SkiErg</strong></td>
+                            <td class="time-current">5:15</td>
+                            <td class="time-target">4:45</td>
+                            <td class="time-savings">0:30</td>
+                            <td>⭐</td>
+                        </tr>
+                        <tr>
+                            <td><strong>50m Sled Push</strong></td>
+                            <td class="time-current">3:00</td>
+                            <td class="time-target">2:30-3:00</td>
+                            <td class="time-savings">✓ Good</td>
+                            <td>✓</td>
+                        </tr>
+                        <tr>
+                            <td><strong>50m Sled Pull</strong></td>
+                            <td class="time-current">6:29</td>
+                            <td class="time-target">3:30</td>
+                            <td class="time-savings">2:59</td>
+                            <td>⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td><strong>80m Burpee Broad Jumps</strong></td>
+                            <td class="time-current">8:27</td>
+                            <td class="time-target">5:00</td>
+                            <td class="time-savings">3:27</td>
+                            <td>⭐⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td><strong>1000m Row</strong></td>
+                            <td class="time-current">5:25</td>
+                            <td class="time-target">4:45</td>
+                            <td class="time-savings">0:40</td>
+                            <td>⭐</td>
+                        </tr>
+                        <tr>
+                            <td><strong>200m Farmers Carry</strong></td>
+                            <td class="time-current">2:30</td>
+                            <td class="time-target">2:00-2:30</td>
+                            <td class="time-savings">✓ Solid</td>
+                            <td>✓</td>
+                        </tr>
+                        <tr>
+                            <td><strong>100m Sandbag Lunges</strong></td>
+                            <td class="time-current">6:56</td>
+                            <td class="time-target">4:30</td>
+                            <td class="time-savings">2:26</td>
+                            <td>⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td><strong>100 Wall Balls</strong></td>
+                            <td class="time-current">11:39</td>
+                            <td class="time-target">3:30-4:00</td>
+                            <td class="time-savings">7:39-8:09</td>
+                            <td>⭐⭐⭐⭐⭐</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="analysis-section">
+            <h2>Running Performance</h2>
+            <div class="card">
+                <h3>Current Running Stats</h3>
+                <ul>
+                    <li><strong>Total Running Time:</strong> ~48 minutes for 8km</li>
+                    <li><strong>Average Pace per Segment:</strong> ~6:00/km</li>
+                    <li><strong>Current 5K Time:</strong> 26:00</li>
+                    <li><strong>Target 5K Time:</strong> 24:00-24:30</li>
+                </ul>
+                <h3 style="margin-top: 1.5rem;">Target Running Performance</h3>
+                <ul>
+                    <li><strong>Target Running Time:</strong> ~42 minutes for 8km</li>
+                    <li><strong>Target Pace per Segment:</strong> ~5:15/km</li>
+                    <li><strong>Potential Savings:</strong> 4-5 minutes</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="analysis-section">
+            <h2>Transition Analysis</h2>
+            <div class="card" style="background: #fff3cd; border-left: 4px solid var(--warning);">
+                <h3 style="color: var(--warning);">⚠️ Biggest Opportunity: Transitions</h3>
+                <ul>
+                    <li><strong>Current Total Transition Time:</strong> 11:39</li>
+                    <li><strong>Target Transition Time:</strong> 4:00</li>
+                    <li><strong>Potential Savings:</strong> 7:39 minutes</li>
+                    <li><strong>Average Transition:</strong> ~87 seconds each</li>
+                    <li><strong>Should Be:</strong> 20-30 seconds max</li>
+                </ul>
+                <h3 style="margin-top: 1.5rem;">Transition Breakdown</h3>
+                <ul>
+                    <li>Rox In: 4:12</li>
+                    <li>Rox Out: 0:31</li>
+                    <li>Rox In: 5:44</li>
+                    <li>Rox Out: 0:42</li>
+                    <li>Rox In: 6:00</li>
+                    <li>Rox Out: 0:38</li>
+                    <li>Rox In: 6:00</li>
+                    <li>Rox Out: 0:32</li>
+                    <li>Rox In: 6:39</li>
+                    <li>Rox Out: 0:11</li>
+                    <li>Rox In: 5:54</li>
+                    <li>Rox Out: 0:14</li>
+                    <li>Rox In: 5:59</li>
+                    <li>Rox Out: 0:13</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="analysis-section">
+            <h2>Priority Ranking for Training Focus</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+                <div class="card" style="border-left: 5px solid var(--primary-color);">
+                    <h3>1. Wall Balls ⭐⭐⭐⭐⭐</h3>
+                    <p><strong>Current:</strong> 11:39</p>
+                    <p><strong>Target:</strong> 3:30-4:00</p>
+                    <p><strong>Savings:</strong> 7-8 minutes</p>
+                    <p style="margin-top: 1rem;"><strong>Action:</strong> Practice 2-3x per week. Work up to sets of 25-30 unbroken. Always practice after running to simulate race fatigue.</p>
+                </div>
+
+                <div class="card" style="border-left: 5px solid var(--warning);">
+                    <h3>2. Transitions ⭐⭐⭐⭐⭐</h3>
+                    <p><strong>Current:</strong> 11:39</p>
+                    <p><strong>Target:</strong> 4:00</p>
+                    <p><strong>Savings:</strong> 5-6 minutes</p>
+                    <p style="margin-top: 1rem;"><strong>Action:</strong> Practice running straight from treadmill to station. Have strategy ready. No rest between run finish and station start.</p>
+                </div>
+
+                <div class="card" style="border-left: 5px solid var(--secondary-color);">
+                    <h3>3. Burpee Broad Jumps ⭐⭐⭐</h3>
+                    <p><strong>Current:</strong> 8:27</p>
+                    <p><strong>Target:</strong> 5:00</p>
+                    <p><strong>Savings:</strong> 3 minutes</p>
+                    <p style="margin-top: 1rem;"><strong>Action:</strong> Practice 3x per week at home. Focus on efficiency: chest-to-ground, explosive jump forward. Target: 3.1 sec/burpee.</p>
+                </div>
+
+                <div class="card" style="border-left: 5px solid var(--success);">
+                    <h3>4. Running ⭐⭐⭐</h3>
+                    <p><strong>Current:</strong> ~48:00</p>
+                    <p><strong>Target:</strong> ~42:00</p>
+                    <p><strong>Savings:</strong> 4-5 minutes</p>
+                    <p style="margin-top: 1rem;"><strong>Action:</strong> Continue Runna plan focused on tempo work. Get 5K time down to 24 minutes. Practice running after stations.</p>
+                </div>
+
+                <div class="card" style="border-left: 5px solid #6c757d;">
+                    <h3>5. Sandbag Lunges ⭐⭐</h3>
+                    <p><strong>Current:</strong> 6:56</p>
+                    <p><strong>Target:</strong> 4:30</p>
+                    <p><strong>Savings:</strong> 2 minutes</p>
+                    <p style="margin-top: 1rem;"><strong>Action:</strong> Heavy DB walking lunges 2x/week at home. Build quad/glute endurance. Practice keeping upright posture.</p>
+                </div>
+
+                <div class="card" style="border-left: 5px solid #6c757d;">
+                    <h3>6. Sled Pull ⭐⭐</h3>
+                    <p><strong>Current:</strong> 6:29</p>
+                    <p><strong>Target:</strong> 3:30</p>
+                    <p><strong>Savings:</strong> 2 minutes</p>
+                    <p style="margin-top: 1rem;"><strong>Action:</strong> Weekly practice at gym. Focus on powerful arm pulls, driving with legs. Find optimal weight (78kg race weight).</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="summary-box">
+            <h2>Total Potential Time Savings</h2>
+            <ul>
+                <li><strong>Wall Balls:</strong> 7-8 minutes</li>
+                <li><strong>Transitions:</strong> 5-6 minutes</li>
+                <li><strong>Burpee Broad Jumps:</strong> 3 minutes</li>
+                <li><strong>Running:</strong> 4-5 minutes</li>
+                <li><strong>Sandbag Lunges:</strong> 2 minutes</li>
+                <li><strong>Sled Pull:</strong> 2 minutes</li>
+                <li><strong>Other stations:</strong> 1-2 minutes</li>
+            </ul>
+            <p style="margin-top: 1.5rem; font-size: 1.3rem; font-weight: bold;">
+                <strong>Total Potential Savings: 24-28 minutes</strong><br>
+                You only need to find 10:32 to hit sub-90. This is absolutely achievable!
+            </p>
+            <p style="margin-top: 1rem; font-size: 1.1rem;">
+                <strong>Key Insight:</strong> Wall balls and transitions alone could give you 12-14 minutes back, which is more than enough to achieve your sub-90 goal!
+            </p>
+        </section>
+
+        <section class="analysis-section">
+            <h2>Detailed Race Splits</h2>
+            <div style="overflow-x: auto;">
+                <table class="station-table">
+                    <thead>
+                        <tr>
+                            <th>Split</th>
+                            <th>Time of Day</th>
+                            <th>Time</th>
+                            <th>Diff</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Rox In</td>
+                            <td>13:54:22</td>
+                            <td>00:04:12</td>
+                            <td>04:12</td>
+                        </tr>
+                        <tr>
+                            <td>1000m SkiErg In</td>
+                            <td>13:54:26</td>
+                            <td>00:04:17</td>
+                            <td>00:05</td>
+                        </tr>
+                        <tr>
+                            <td>1000m SkiErg Out</td>
+                            <td>13:59:42</td>
+                            <td>00:09:32</td>
+                            <td>05:15</td>
+                        </tr>
+                        <tr>
+                            <td>Rox Out</td>
+                            <td>14:00:12</td>
+                            <td>00:10:03</td>
+                            <td>00:31</td>
+                        </tr>
+                        <tr>
+                            <td>Rox In</td>
+                            <td>14:05:56</td>
+                            <td>00:15:47</td>
+                            <td>05:44</td>
+                        </tr>
+                        <tr>
+                            <td>50m Sled Push In</td>
+                            <td>14:06:02</td>
+                            <td>00:15:52</td>
+                            <td>00:05</td>
+                        </tr>
+                        <tr>
+                            <td>50m Sled Push Out</td>
+                            <td>14:09:02</td>
+                            <td>00:18:52</td>
+                            <td>03:00</td>
+                        </tr>
+                        <tr>
+                            <td>Rox Out</td>
+                            <td>14:09:44</td>
+                            <td>00:19:34</td>
+                            <td>00:42</td>
+                        </tr>
+                        <tr>
+                            <td>Rox In</td>
+                            <td>14:15:44</td>
+                            <td>00:25:34</td>
+                            <td>06:00</td>
+                        </tr>
+                        <tr>
+                            <td>50m Sled Pull In</td>
+                            <td>14:15:58</td>
+                            <td>00:25:49</td>
+                            <td>00:15</td>
+                        </tr>
+                        <tr>
+                            <td>50m Sled Pull Out</td>
+                            <td>14:22:28</td>
+                            <td>00:32:18</td>
+                            <td>06:29</td>
+                        </tr>
+                        <tr>
+                            <td>Rox Out</td>
+                            <td>14:23:06</td>
+                            <td>00:32:56</td>
+                            <td>00:38</td>
+                        </tr>
+                        <tr>
+                            <td>Rox In</td>
+                            <td>14:29:05</td>
+                            <td>00:38:56</td>
+                            <td>06:00</td>
+                        </tr>
+                        <tr>
+                            <td>80m Burpee Broad Jump In</td>
+                            <td>14:29:24</td>
+                            <td>00:39:14</td>
+                            <td>00:18</td>
+                        </tr>
+                        <tr>
+                            <td>80m Burpee Broad Jump Out</td>
+                            <td>14:37:51</td>
+                            <td>00:47:41</td>
+                            <td>08:27</td>
+                        </tr>
+                        <tr>
+                            <td>Rox Out</td>
+                            <td>14:38:23</td>
+                            <td>00:48:13</td>
+                            <td>00:32</td>
+                        </tr>
+                        <tr>
+                            <td>Rox In</td>
+                            <td>14:45:02</td>
+                            <td>00:54:52</td>
+                            <td>06:39</td>
+                        </tr>
+                        <tr>
+                            <td>1000m Row In</td>
+                            <td>14:45:23</td>
+                            <td>00:55:13</td>
+                            <td>00:21</td>
+                        </tr>
+                        <tr>
+                            <td>1000m Row Out</td>
+                            <td>14:50:48</td>
+                            <td>01:00:38</td>
+                            <td>05:25</td>
+                        </tr>
+                        <tr>
+                            <td>Rox Out</td>
+                            <td>14:50:59</td>
+                            <td>01:00:49</td>
+                            <td>00:11</td>
+                        </tr>
+                        <tr>
+                            <td>Rox In</td>
+                            <td>14:56:53</td>
+                            <td>01:06:43</td>
+                            <td>05:54</td>
+                        </tr>
+                        <tr>
+                            <td>200m Farmers Carry In</td>
+                            <td>14:57:43</td>
+                            <td>01:07:33</td>
+                            <td>00:50</td>
+                        </tr>
+                        <tr>
+                            <td>200m Farmers Carry Out</td>
+                            <td>15:00:12</td>
+                            <td>01:10:03</td>
+                            <td>02:30</td>
+                        </tr>
+                        <tr>
+                            <td>Rox Out</td>
+                            <td>15:00:27</td>
+                            <td>01:10:17</td>
+                            <td>00:14</td>
+                        </tr>
+                        <tr>
+                            <td>Rox In</td>
+                            <td>15:06:26</td>
+                            <td>01:16:16</td>
+                            <td>05:59</td>
+                        </tr>
+                        <tr>
+                            <td>100m Sandbag Lunges In</td>
+                            <td>15:07:10</td>
+                            <td>01:17:00</td>
+                            <td>00:44</td>
+                        </tr>
+                        <tr>
+                            <td>100m Sandbag Lunges Out</td>
+                            <td>15:14:06</td>
+                            <td>01:23:56</td>
+                            <td>06:56</td>
+                        </tr>
+                        <tr>
+                            <td>Rox Out</td>
+                            <td>15:14:18</td>
+                            <td>01:24:09</td>
+                            <td>00:13</td>
+                        </tr>
+                        <tr>
+                            <td>Wall Balls In</td>
+                            <td>15:19:03</td>
+                            <td>01:28:53</td>
+                            <td>04:44</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total</strong></td>
+                            <td><strong>15:30:42</strong></td>
+                            <td><strong>01:40:32</strong></td>
+                            <td><strong>11:39</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Hyrox Training Plan - Glasgow March 14th</p>
+    </footer>
+</body>
+</html>
+
