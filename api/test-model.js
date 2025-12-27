@@ -31,28 +31,36 @@ module.exports = async (req, res) => {
         // Test with a simple prompt
         const prompt = testPrompt || "Say 'Hello, this model works!' in one sentence.";
         
-        // Use REST API directly
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        // Try both v1beta and v1 API endpoints
+        const apiVersions = ['v1beta', 'v1'];
+        let lastError;
         
-        const payload = {
-            contents: [{
-                parts: [{
-                    text: prompt
-                }]
-            }],
-            generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 100,
-            }
-        };
+        for (const apiVersion of apiVersions) {
+            try {
+                console.log(`Testing model ${model} with API ${apiVersion}`);
+                
+                // Use REST API directly
+                const url = `https://generativelanguage.googleapis.com/${apiVersion}/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+                
+                const payload = {
+                    contents: [{
+                        parts: [{
+                            text: prompt
+                        }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.7,
+                        maxOutputTokens: 100,
+                    }
+                };
 
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
 
         if (!response.ok) {
             let errorMsg = `HTTP ${response.status}`;
@@ -89,13 +97,24 @@ module.exports = async (req, res) => {
             throw new Error('Invalid response format from Gemini API');
         }
 
-        const text = data.candidates[0].content.parts[0].text;
+                const text = data.candidates[0].content.parts[0].text;
 
-        return res.status(200).json({ 
-            success: true,
-            model: model,
-            response: text
-        });
+                return res.status(200).json({ 
+                    success: true,
+                    model: model,
+                    apiVersion: apiVersion,
+                    response: text
+                });
+                
+            } catch (error) {
+                console.log(`API ${apiVersion} failed for model ${model}:`, error.message);
+                lastError = error;
+                continue; // Try next API version
+            }
+        }
+        
+        // If we get here, both API versions failed
+        throw lastError || new Error('Both API versions failed');
 
     } catch (error) {
         console.error('Model test error:', error);

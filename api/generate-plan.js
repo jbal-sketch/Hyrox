@@ -40,10 +40,10 @@ module.exports = async (req, res) => {
         // Try gemini-2.5-flash first (newest), fallback to others
         const modelsToTry = [
             process.env.GEMINI_MODEL, // User-specified model first
-            'gemini-2.5-flash',       // Newest model
-            'gemini-1.5-flash',       // Fast and reliable
+            'gemini-1.5-flash',       // Most reliable and widely available
             'gemini-1.5-pro',         // Higher quality
-            'gemini-pro'              // Original fallback
+            'gemini-pro',             // Original fallback
+            'gemini-2.5-flash'        // Newest (may not be available yet)
         ].filter(Boolean); // Remove undefined values
 
         // System instruction for the AI
@@ -58,34 +58,38 @@ Generate a complete, week-by-week Hyrox training plan in HTML format. The plan s
         console.log('Trying models in order:', modelsToTry);
 
         // Try each model until one works
+        // Also try both v1beta and v1 API endpoints
+        const apiVersions = ['v1beta', 'v1'];
         let lastError;
+        
         for (const modelName of modelsToTry) {
-            try {
-                console.log(`Attempting to use model: ${modelName}`);
-                
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
-                
-                const payload = {
-                    contents: [{
-                        parts: [{
-                            text: fullPrompt
-                        }]
-                    }],
-                    generationConfig: {
-                        temperature: 0.7,
-                        topK: 40,
-                        topP: 0.95,
-                        maxOutputTokens: 8192,
-                    }
-                };
+            for (const apiVersion of apiVersions) {
+                try {
+                    console.log(`Attempting to use model: ${modelName} with API ${apiVersion}`);
+                    
+                    const url = `https://generativelanguage.googleapis.com/${apiVersion}/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
+                    
+                    const payload = {
+                        contents: [{
+                            parts: [{
+                                text: fullPrompt
+                            }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            topK: 40,
+                            topP: 0.95,
+                            maxOutputTokens: 8192,
+                        }
+                    };
 
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
 
                 if (!response.ok) {
                     let errorMsg = `HTTP ${response.status}`;
@@ -123,25 +127,27 @@ Generate a complete, week-by-week Hyrox training plan in HTML format. The plan s
                     throw new Error('Invalid response format from Gemini API');
                 }
 
-                const generatedHTML = data.candidates[0].content.parts[0].text;
-                
-                console.log(`Successfully generated plan using model: ${modelName}`);
+                    const generatedHTML = data.candidates[0].content.parts[0].text;
+                    
+                    console.log(`Successfully generated plan using model: ${modelName} with API ${apiVersion}`);
 
-                // Return the generated HTML
-                return res.status(200).json({ 
-                    html: generatedHTML,
-                    success: true,
-                    model: modelName
-                });
+                    // Return the generated HTML
+                    return res.status(200).json({ 
+                        html: generatedHTML,
+                        success: true,
+                        model: modelName,
+                        apiVersion: apiVersion
+                    });
 
-            } catch (error) {
-                console.log(`Model ${modelName} error:`, {
-                    message: error.message,
-                    stack: error.stack,
-                    name: error.name
-                });
-                lastError = error;
-                continue; // Try next model
+                } catch (error) {
+                    console.log(`Model ${modelName} (${apiVersion}) error:`, {
+                        message: error.message,
+                        stack: error.stack,
+                        name: error.name
+                    });
+                    lastError = error;
+                    continue; // Try next API version or model
+                }
             }
         }
 
