@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Model Test Harness</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 2rem;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+        
+        .api-key-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border: 2px solid #e9ecef;
+        }
+        
+        .api-key-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .api-key-section input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: monospace;
+        }
+        
+        .api-key-section input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results {
+            margin-top: 2rem;
+        }
+        
+        .model-test {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .model-test.testing {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .model-test.success {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .model-test.failed {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .model-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .model-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .status-icon {
+            font-size: 1.2rem;
+        }
+        
+        .status-text {
+            font-weight: 600;
+        }
+        
+        .model-details {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #ddd;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+        
+        .summary h2 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .summary ul {
+            list-style: none;
+            margin-top: 0.5rem;
+        }
+        
+        .summary li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .summary li:last-child {
+            border-bottom: none;
+        }
+        
+        .recommendation {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 Gemini API Model Test Harness</h1>
+        <p class="subtitle">Test which Gemini models are available with your API key</p>
+        
+        <div class="api-key-section">
+            <label for="apiKey">Gemini API Key:</label>
+            <input 
+                type="password" 
+                id="apiKey" 
+                placeholder="Enter your Gemini API key (AIzaSy...)"
+                value="AIzaSyBGaMbsDgg0kvsCGWBXuHF70ERjeyaQnww"
+            >
+            <div class="warning">
+                ⚠️ This key will be sent to your backend API. Make sure you're using a test key or are comfortable with this.
+            </div>
+        </div>
+        
+        <button id="testButton" onclick="runTests()">Run Model Tests</button>
+        
+        <div id="results" class="results"></div>
+        
+        <div id="summary" class="summary" style="display: none;">
+            <h2>📊 Test Summary</h2>
+            <div id="summaryContent"></div>
+        </div>
+    </div>
+    
+    <script>
+        const MODELS_TO_TEST = [
+            'gemini-1.5-flash',
+            'gemini-1.5-pro',
+            'gemini-pro',
+            'gemini-1.0-pro',
+            'gemini-1.0-pro-latest',
+        ];
+        
+        async function testModel(modelName, apiKey) {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'model-test testing';
+            resultDiv.id = `test-${modelName}`;
+            
+            resultDiv.innerHTML = `
+                <div class="model-name">${modelName}</div>
+                <div class="model-status">
+                    <span class="status-icon">⏳</span>
+                    <span class="status-text">Testing...</span>
+                </div>
+            `;
+            
+            document.getElementById('results').appendChild(resultDiv);
+            
+            try {
+                // Call backend API to test the model
+                const response = await fetch('/api/test-model', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: modelName,
+                        apiKey: apiKey,
+                        testPrompt: "Say 'Hello, this model works!' in one sentence."
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.className = 'model-test success';
+                    resultDiv.innerHTML = `
+                        <div class="model-name">${modelName}</div>
+                        <div class="model-status">
+                            <span class="status-icon">✅</span>
+                            <span class="status-text">Success!</span>
+                        </div>
+                        <div class="model-details">
+                            <strong>Response:</strong> ${data.response.substring(0, 100)}...
+                        </div>
+                    `;
+                    return { modelName, success: true, response: data.response };
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+                
+            } catch (error) {
+                resultDiv.className = 'model-test failed';
+                resultDiv.innerHTML = `
+                    <div class="model-name">${modelName}</div>
+                    <div class="model-status">
+                        <span class="status-icon">❌</span>
+                        <span class="status-text">Failed</span>
+                    </div>
+                    <div class="model-details">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+                return { modelName, success: false, error: error.message };
+            }
+        }
+        
+        async function runTests() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            
+            if (!apiKey) {
+                alert('Please enter your Gemini API key');
+                return;
+            }
+            
+            const button = document.getElementById('testButton');
+            button.disabled = true;
+            button.innerHTML = '<span class="loading"></span> Testing models...';
+            
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('summary').style.display = 'none';
+            
+            const results = [];
+            
+            for (const modelName of MODELS_TO_TEST) {
+                const result = await testModel(modelName, apiKey);
+                results.push(result);
+                
+                // Small delay between tests
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            // Show summary
+            const workingModels = results.filter(r => r.success);
+            const failedModels = results.filter(r => !r.success);
+            
+            let summaryHTML = '';
+            
+            if (workingModels.length > 0) {
+                summaryHTML += '<h3>✅ Working Models:</h3><ul>';
+                workingModels.forEach(r => {
+                    summaryHTML += `<li><strong>${r.modelName}</strong> - Ready to use!</li>`;
+                });
+                summaryHTML += '</ul>';
+                
+                summaryHTML += `
+                    <div class="recommendation">
+                        💡 <strong>Recommended:</strong> Use "${workingModels[0].modelName}" in your Vercel environment variables.<br><br>
+                        Set <code>GEMINI_MODEL=${workingModels[0].modelName}</code> in Vercel Dashboard → Settings → Environment Variables
+                    </div>
+                `;
+            } else {
+                summaryHTML += '<h3>⚠️ No working models found</h3>';
+                summaryHTML += '<p>Check your API key and ensure it has access to Gemini models.</p>';
+            }
+            
+            if (failedModels.length > 0) {
+                summaryHTML += '<h3 style="margin-top: 1rem;">❌ Failed Models:</h3><ul>';
+                failedModels.forEach(r => {
+                    summaryHTML += `<li><strong>${r.modelName}</strong> - ${r.error}</li>`;
+                });
+                summaryHTML += '</ul>';
+            }
+            
+            document.getElementById('summaryContent').innerHTML = summaryHTML;
+            document.getElementById('summary').style.display = 'block';
+            
+            button.disabled = false;
+            button.textContent = 'Run Model Tests Again';
+        }
+    </script>
+</body>
+</html>
+

@@ -5,6 +5,9 @@
     },
     "api/parse-hyresult.js": {
       "maxDuration": 30
+    },
+    "api/test-model.js": {
+      "maxDuration": 30
     }
   }
 }
