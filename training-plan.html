@@ -13,19 +13,101 @@
             <ul class="nav-menu">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="input.html">Create Plan</a></li>
-                <li><a href="training-plan.html" class="active">Training Plan</a></li>
-                <li><a href="nutrition.html">Nutrition</a></li>
-                <li><a href="race-analysis.html">Race Analysis</a></li>
+                <li><a href="training-plan.html" class="active">My Plan</a></li>
             </ul>
         </div>
     </nav>
 
     <main class="container">
         <header class="hero">
-            <h1>11-Week Training Plan</h1>
-            <h2>Glasgow March 14th - Sub-90 Goal</h2>
+            <h1>Glasgow Hyrox</h1>
+            <h2>March 14, 2025</h2>
+            <p class="subtitle">Women's Open - 11-Week Training Plan</p>
+            <div style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.2); border-radius: 8px;">
+                <p style="margin: 0.5rem 0;"><strong>Share Your Plan:</strong></p>
+                <p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Share this URL with coaches, training partners, or friends:</p>
+                <input type="text" value="https://hyrox-jbal-a31bfpmp5-janetebalneaves-gmailcoms-projects.vercel.app/training-plan.html" readonly style="width: 100%; max-width: 600px; padding: 0.5rem; border-radius: 5px; font-size: 0.9rem;" id="planUrl">
+                <button onclick="copyPlanUrl()" style="margin-top: 0.5rem; padding: 0.5rem 1.5rem; background: white; color: var(--primary-color); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Copy Plan URL</button>
+            </div>
         </header>
 
+        <section class="overview">
+            <div class="card">
+                <h2>Current Status</h2>
+                <ul>
+                    <li><strong>Current Time:</strong> 1:35:00</li>
+                    <li><strong>Target Time:</strong> 1:30:00</li>
+                    <li><strong>Time to Find:</strong> 5:00</li>
+                    <li><strong>Current 5K:</strong> 26:00</li>
+                    <li><strong>Target 5K:</strong> 24:00</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>Training Schedule</h2>
+                <ul>
+                    <li><strong>Running Days:</strong> 3x per week</li>
+                    <li><strong>Strength Days:</strong> 2x per week</li>
+                    <li><strong>Gym/Hyrox Days:</strong> 1x per week</li>
+                    <li><strong>Rest Days:</strong> 1x per week</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="priorities">
+            <h2>Key Training Priorities</h2>
+            <div class="priority-grid">
+                <div class="priority-item priority-1">
+                    <span class="priority-number">1</span>
+                    <h3>Wall Balls</h3>
+                    <p>6:30 → 4:30</p>
+                    <p class="savings">Save 2:00</p>
+                </div>
+                <div class="priority-item priority-2">
+                    <span class="priority-number">2</span>
+                    <h3>1000m Row</h3>
+                    <p>5:30 → 4:45</p>
+                    <p class="savings">Save 0:45</p>
+                </div>
+                <div class="priority-item priority-3">
+                    <span class="priority-number">3</span>
+                    <h3>1000m SkiErg</h3>
+                    <p>5:15 → 4:45</p>
+                    <p class="savings">Save 0:30</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="race-weights">
+            <h2>Women's Open Race Weights</h2>
+            <div class="weights-grid">
+                <div class="weight-item">
+                    <h3>Sled Push</h3>
+                    <p class="weight">102kg</p>
+                    <p class="note">(including sled)</p>
+                </div>
+                <div class="weight-item">
+                    <h3>Sled Pull</h3>
+                    <p class="weight">78kg</p>
+                    <p class="note">(including sled)</p>
+                </div>
+                <div class="weight-item">
+                    <h3>Farmers Carry</h3>
+                    <p class="weight">2 x 16kg</p>
+                    <p class="note">32kg total</p>
+                </div>
+                <div class="weight-item">
+                    <h3>Sandbag Lunges</h3>
+                    <p class="weight">12kg</p>
+                </div>
+                <div class="weight-item">
+                    <h3>Wall Balls</h3>
+                    <p class="weight">4kg</p>
+                </div>
+            </div>
+        </section>
+
+        <div id="training-plan-content">
         <!-- Week 1 -->
         <section class="week-section">
             <div class="week-header">
@@ -464,6 +546,7 @@
                 </ul>
             </div>
         </section>
+        </div>
 
         <section class="card" style="margin-top: 3rem;">
             <h2>Training Notes</h2>
@@ -480,8 +563,18 @@
     </main>
 
     <footer>
-        <p>&copy; 2024 Hyrox Training Plan - Glasgow March 14th</p>
+        <p>&copy; 2024 Hyrox Training Plan Generator</p>
     </footer>
+
+    <script>
+        function copyPlanUrl() {
+            const urlInput = document.getElementById('planUrl');
+            urlInput.select();
+            urlInput.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            alert('Plan URL copied to clipboard!');
+        }
+    </script>
 </body>
 </html>
 
