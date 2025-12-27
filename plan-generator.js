@@ -485,23 +485,35 @@ function closeDebugModal() {
 
 function copyPromptToClipboard() {
     const promptContent = document.getElementById('debugPromptContent');
-    if (promptContent && promptContent.dataset.prompt) {
-        const prompt = promptContent.dataset.prompt;
-        navigator.clipboard.writeText(prompt).then(() => {
-            alert('Prompt copied to clipboard!');
-        }).catch(err => {
-            // Fallback for older browsers
-            const textArea = document.createElement('textarea');
-            textArea.value = prompt;
-            textArea.style.position = 'fixed';
-            textArea.style.opacity = '0';
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            alert('Prompt copied to clipboard!');
-        });
+    if (promptContent) {
+        const prompt = promptContent.textContent || promptContent.innerText || promptContent.dataset.prompt;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(prompt).then(() => {
+                alert('✅ Prompt copied to clipboard!');
+            }).catch(err => {
+                fallbackCopyPrompt(prompt);
+            });
+        } else {
+            fallbackCopyPrompt(prompt);
+        }
     }
+}
+
+function fallbackCopyPrompt(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    textArea.style.left = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+        document.execCommand('copy');
+        alert('✅ Prompt copied to clipboard!');
+    } catch (err) {
+        alert('❌ Failed to copy. Please select and copy manually.');
+    }
+    document.body.removeChild(textArea);
 }
 
 async function proceedWithGeneration() {
@@ -517,10 +529,10 @@ async function proceedWithGeneration() {
     }
 }
 
-// Listen for proceed event from input.html
-window.addEventListener('proceedGeneration', function() {
-    proceedWithGeneration();
-});
+// Make functions globally available for modal buttons
+window.closeDebugModal = closeDebugModal;
+window.copyPromptToClipboard = copyPromptToClipboard;
+window.proceedWithGeneration = proceedWithGeneration;
 
 function generatePlanHTML(data, weeks, timeToFind, weights, priorities, planId) {
     const currentTimeFormatted = formatTime(data.currentTime);

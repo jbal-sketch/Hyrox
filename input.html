@@ -792,19 +792,6 @@
             document.body.removeChild(textArea);
         }
         
-        window.proceedWithGeneration = function() {
-            // This will be handled by plan-generator.js
-            const event = new Event('proceedGeneration');
-            window.dispatchEvent(event);
-        };
-        
-        // Listen for proceed event
-        window.addEventListener('proceedGeneration', function() {
-            // Close modal first
-            closeDebugModal();
-            // The actual generation will continue in plan-generator.js
-        });
-        
         // Close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('debugModal');
