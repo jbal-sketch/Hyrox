@@ -64,6 +64,7 @@ function parseHyroxCSV(csvText) {
         const stationData = {};
         let totalTime = null;
         let previousTime = null;
+        let wallBallsEntryTime = null; // Track wall balls entry time to calculate duration
 
         for (let i = 1; i < lines.length; i++) {
             const row = parseCSVLine(lines[i]);
@@ -90,47 +91,75 @@ function parseHyroxCSV(csvText) {
             if (!stationTime && previousTime && timeValue) {
                 stationTime = timeValue - previousTime;
             }
-            previousTime = timeValue;
 
+            // Check for "Total Time" first to handle wall balls calculation
+            if (splitName.includes('total') && (splitName.includes('time') || splitName.includes('finish'))) {
+                // This is the total race time
+                if (timeValue) {
+                    totalTime = timeValue;
+                    // If we have wall balls entry time but haven't captured wall balls station time yet,
+                    // calculate it as the difference between total time and wall balls entry time
+                    if (wallBallsEntryTime && !stationData.wallBalls) {
+                        stationData.wallBalls = timeValue - wallBallsEntryTime;
+                    }
+                }
+                previousTime = timeValue;
+            }
             // Map station names to our form fields
             // Look for "Out" entries which indicate completion of a station
-            if (splitName.includes('ski') && (splitName.includes('erg') || splitName.includes('erg'))) {
+            else if (splitName.includes('ski') && (splitName.includes('erg') || splitName.includes('erg'))) {
                 if (splitName.includes('out') || splitName.includes('1000m')) {
                     if (stationTime) stationData.skiErg = stationTime;
                 }
+                previousTime = timeValue;
             } else if (splitName.includes('sled') && splitName.includes('push')) {
                 if (splitName.includes('out') || splitName.includes('50m')) {
                     if (stationTime) stationData.sledPush = stationTime;
                 }
+                previousTime = timeValue;
             } else if (splitName.includes('sled') && splitName.includes('pull')) {
                 if (splitName.includes('out') || splitName.includes('50m')) {
                     if (stationTime) stationData.sledPull = stationTime;
                 }
+                previousTime = timeValue;
             } else if (splitName.includes('burpee') || (splitName.includes('broad') && splitName.includes('jump'))) {
                 if (splitName.includes('out') || splitName.includes('80m')) {
                     if (stationTime) stationData.burpee = stationTime;
                 }
+                previousTime = timeValue;
             } else if (splitName.includes('row') && !splitName.includes('rox') && !splitName.includes('in')) {
                 if (splitName.includes('out') || splitName.includes('1000m')) {
                     if (stationTime) stationData.row = stationTime;
                 }
+                previousTime = timeValue;
             } else if (splitName.includes('farmers') || (splitName.includes('carry') && !splitName.includes('sandbag'))) {
                 if (splitName.includes('out') || splitName.includes('200m')) {
                     if (stationTime) stationData.farmers = stationTime;
                 }
+                previousTime = timeValue;
             } else if (splitName.includes('lunge') || splitName.includes('sandbag')) {
                 if (splitName.includes('out') || splitName.includes('100m')) {
                     if (stationTime) stationData.lunges = stationTime;
                 }
+                previousTime = timeValue;
             } else if (splitName.includes('wall') && splitName.includes('ball')) {
-                if (splitName.includes('out') || splitName.includes('total') || splitName.includes('100')) {
-                    if (stationTime) stationData.wallBalls = stationTime;
-                }
-            } else if (splitName.includes('total') || splitName.includes('finish')) {
-                // This is the total race time
+                // Track wall balls entry time - it may not have 'out' in the name
                 if (timeValue) {
-                    totalTime = timeValue;
+                    wallBallsEntryTime = timeValue;
                 }
+                // If we have a direct station time (from diff or calculation), use it
+                if (stationTime) {
+                    stationData.wallBalls = stationTime;
+                } else if (splitName.includes('out') || splitName.includes('100')) {
+                    // Fallback: if it has 'out' or '100', try to use calculated time
+                    if (previousTime && timeValue) {
+                        stationData.wallBalls = timeValue - previousTime;
+                    }
+                }
+                previousTime = timeValue;
+            } else {
+                // For any other row, just update previousTime
+                previousTime = timeValue;
             }
         }
 

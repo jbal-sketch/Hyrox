@@ -302,6 +302,10 @@ body {
     width: 100%;
 }
 
+.race-weights h2 {
+    margin-bottom: var(--spacing-md);
+}
+
 .priorities h2::after,
 .race-weights h2::after,
 .quick-links h2::after {
@@ -389,45 +393,46 @@ body {
 /* Weights Grid */
 .weights-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--spacing-md);
 }
 
 .weight-item {
     background: var(--gradient-card);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    padding: var(--spacing-xl);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
     border: 1px solid rgba(255, 255, 255, 0.5);
     text-align: center;
     transition: all var(--transition-base);
 }
 
 .weight-item:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-xl);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
 .weight-item h3 {
     color: var(--text-dark);
-    margin-bottom: var(--spacing-md);
-    font-size: 1.25rem;
+    margin-bottom: var(--spacing-xs);
+    font-size: 1rem;
     font-weight: 600;
 }
 
 .weight {
-    font-size: 2.5rem;
+    font-size: 1.75rem;
     font-weight: 800;
     color: var(--primary-color);
-    margin: var(--spacing-sm) 0;
+    margin: var(--spacing-xs) 0;
     letter-spacing: -0.02em;
 }
 
 .note {
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    margin-top: var(--spacing-xs);
 }
 
 /* Links Grid */
@@ -852,7 +857,16 @@ footer {
     }
 
     .container {
-        padding: var(--spacing-lg) var(--spacing-md);
+        padding: var(--spacing-md) var(--spacing-sm);
+    }
+
+    /* Extra compact for training plan content */
+    #training-plan-content {
+        padding: 0;
+    }
+
+    #training-plan-content .week-section:first-child {
+        margin-top: 0;
     }
 
     .overview {
@@ -863,15 +877,29 @@ footer {
     .priority-grid,
     .weights-grid,
     .links-grid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-md);
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: var(--spacing-sm);
     }
 
     .card,
     .priority-item,
     .weight-item,
     .link-card {
-        padding: var(--spacing-md);
+        padding: var(--spacing-sm);
+    }
+
+    .weight-item h3 {
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .weight {
+        font-size: 1.5rem;
+        margin: 0.25rem 0;
+    }
+
+    .note {
+        font-size: 0.75rem;
     }
 
     .station-table {
@@ -886,6 +914,69 @@ footer {
     .day-header {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    /* Compact training plan styles for mobile */
+    .week-section {
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .week-header {
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .week-header h2 {
+        font-size: 1.5rem;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .week-header p {
+        font-size: 0.95rem;
+    }
+
+    .day-card {
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-sm);
+        border-left-width: 3px;
+    }
+
+    .day-title {
+        font-size: 1.15rem;
+    }
+
+    .day-type {
+        padding: 0.25rem var(--spacing-sm);
+        font-size: 0.8rem;
+    }
+
+    .exercise-item {
+        padding: var(--spacing-sm);
+        margin-bottom: var(--spacing-xs);
+        line-height: 1.4;
+    }
+
+    .exercise-name {
+        font-size: 0.95rem;
+        margin-bottom: 0.25rem;
+        line-height: 1.3;
+    }
+
+    .exercise-details {
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+
+    .exercise-list {
+        margin: 0;
+        padding: 0;
+    }
+
+    .weight-badge {
+        padding: 0.15rem var(--spacing-xs);
+        font-size: 0.75rem;
+        margin-left: var(--spacing-xs);
     }
 }
 
