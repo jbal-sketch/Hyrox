@@ -52,8 +52,21 @@ async function parseHyResultUrl() {
         const result = await response.json();
 
         if (result.success && result.data) {
+            // Debug: log what was parsed
+            console.log('Parsed HyResult data:', result.data);
+            console.log('Station times found:', result.data.stationTimes);
+            
             populateFormFromHyResult(result.data);
-            statusDiv.innerHTML = '<div class="csv-success">✓ HyResult data parsed successfully! Form fields have been populated.</div>';
+            
+            // Count how many fields were populated
+            const populatedCount = Object.keys(result.data.stationTimes).filter(key => result.data.stationTimes[key] > 0).length;
+            const totalStations = 8;
+            
+            if (populatedCount > 0) {
+                statusDiv.innerHTML = `<div class="csv-success">✓ HyResult data parsed successfully! ${populatedCount} station${populatedCount > 1 ? 's' : ''} populated.</div>`;
+            } else {
+                statusDiv.innerHTML = '<div class="csv-error">⚠ Parsed but no station times found. Please check the URL or manually enter times.</div>';
+            }
         } else {
             throw new Error(result.error || 'Failed to parse HyResult data');
         }
@@ -71,53 +84,65 @@ async function parseHyResultUrl() {
 }
 
 function populateFormFromHyResult(data) {
-    // Populate station times
-    if (data.stationTimes.skiErg) {
+    console.log('Populating form with data:', data);
+    
+    // Populate station times - check each one and log if missing
+    if (data.stationTimes && data.stationTimes.skiErg) {
         const time = secondsToTime(data.stationTimes.skiErg);
         document.getElementById('skiErgMin').value = time.minutes;
         document.getElementById('skiErgSec').value = time.seconds;
+        console.log('Populated SkiErg:', time);
+    } else {
+        console.log('SkiErg not found in data');
     }
     
-    if (data.stationTimes.sledPush) {
+    if (data.stationTimes && data.stationTimes.sledPush) {
         const time = secondsToTime(data.stationTimes.sledPush);
         document.getElementById('sledPushMin').value = time.minutes;
         document.getElementById('sledPushSec').value = time.seconds;
+        console.log('Populated Sled Push:', time);
     }
     
-    if (data.stationTimes.sledPull) {
+    if (data.stationTimes && data.stationTimes.sledPull) {
         const time = secondsToTime(data.stationTimes.sledPull);
         document.getElementById('sledPullMin').value = time.minutes;
         document.getElementById('sledPullSec').value = time.seconds;
+        console.log('Populated Sled Pull:', time);
     }
     
-    if (data.stationTimes.burpee) {
+    if (data.stationTimes && data.stationTimes.burpee) {
         const time = secondsToTime(data.stationTimes.burpee);
         document.getElementById('burpeeMin').value = time.minutes;
         document.getElementById('burpeeSec').value = time.seconds;
+        console.log('Populated Burpee:', time);
     }
     
-    if (data.stationTimes.row) {
+    if (data.stationTimes && data.stationTimes.row) {
         const time = secondsToTime(data.stationTimes.row);
         document.getElementById('rowMin').value = time.minutes;
         document.getElementById('rowSec').value = time.seconds;
+        console.log('Populated Row:', time);
     }
     
-    if (data.stationTimes.farmers) {
+    if (data.stationTimes && data.stationTimes.farmers) {
         const time = secondsToTime(data.stationTimes.farmers);
         document.getElementById('farmersMin').value = time.minutes;
         document.getElementById('farmersSec').value = time.seconds;
+        console.log('Populated Farmers:', time);
     }
     
-    if (data.stationTimes.lunges) {
+    if (data.stationTimes && data.stationTimes.lunges) {
         const time = secondsToTime(data.stationTimes.lunges);
         document.getElementById('lungesMin').value = time.minutes;
         document.getElementById('lungesSec').value = time.seconds;
+        console.log('Populated Lunges:', time);
     }
     
-    if (data.stationTimes.wallBalls) {
+    if (data.stationTimes && data.stationTimes.wallBalls) {
         const time = secondsToTime(data.stationTimes.wallBalls);
         document.getElementById('wallBallsMin').value = time.minutes;
         document.getElementById('wallBallsSec').value = time.seconds;
+        console.log('Populated Wall Balls:', time);
     }
     
     // Populate total race time if found

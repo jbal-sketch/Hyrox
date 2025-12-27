@@ -170,48 +170,101 @@ function parseHyResultPage(html) {
     }
 
     // Process rows to extract station times
-    let previousTime = null;
+    // Calculate station times from "In" to "Out" entries
+    let previousCumulative = 0;
     
-    for (const row of rows) {
-        const splitName = row.split.toLowerCase();
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const splitName = row.split.toLowerCase().trim();
         const diffSeconds = parseTimeToSeconds(row.diff);
         const cumulativeSeconds = parseTimeToSeconds(row.cumulativeTime);
 
-        // Map station names to our format
+        // Skip empty or invalid rows
+        if (!splitName) continue;
+
+        // Calculate time difference from previous row if diff is not available or seems wrong
+        let stationTime = diffSeconds;
+        if (stationTime === 0 && cumulativeSeconds > previousCumulative) {
+            stationTime = cumulativeSeconds - previousCumulative;
+        }
+        previousCumulative = cumulativeSeconds;
+
+        // Map station names to our format - look for "Out" entries which indicate station completion
+        // Format examples: "SkiErg Out", "Sled Push Out", "Burpee Broad Jump Out"
+        
         if (splitName.includes('ski') && splitName.includes('erg')) {
-            if (splitName.includes('out')) {
-                data.stationTimes.skiErg = diffSeconds;
+            if (splitName.includes('out') && !splitName.includes('in')) {
+                data.stationTimes.skiErg = stationTime;
             }
         } else if (splitName.includes('sled') && splitName.includes('push')) {
-            if (splitName.includes('out')) {
-                data.stationTimes.sledPush = diffSeconds;
+            if (splitName.includes('out') && !splitName.includes('in')) {
+                data.stationTimes.sledPush = stationTime;
             }
         } else if (splitName.includes('sled') && splitName.includes('pull')) {
-            if (splitName.includes('out')) {
-                data.stationTimes.sledPull = diffSeconds;
+            if (splitName.includes('out') && !splitName.includes('in')) {
+                data.stationTimes.sledPull = stationTime;
             }
         } else if (splitName.includes('burpee') || (splitName.includes('broad') && splitName.includes('jump'))) {
-            if (splitName.includes('out')) {
-                data.stationTimes.burpee = diffSeconds;
+            if (splitName.includes('out') && !splitName.includes('in')) {
+                data.stationTimes.burpee = stationTime;
             }
-        } else if (splitName.includes('row') && !splitName.includes('rox')) {
-            if (splitName.includes('out')) {
-                data.stationTimes.row = diffSeconds;
+        } else if (splitName.includes('row') && !splitName.includes('rox') && !splitName.includes('zone')) {
+            if (splitName.includes('out') && !splitName.includes('in')) {
+                data.stationTimes.row = stationTime;
             }
         } else if (splitName.includes('farmers') || (splitName.includes('carry') && !splitName.includes('sandbag'))) {
-            if (splitName.includes('out')) {
-                data.stationTimes.farmers = diffSeconds;
+            if (splitName.includes('out') && !splitName.includes('in')) {
+                data.stationTimes.farmers = stationTime;
             }
         } else if (splitName.includes('lunge') || splitName.includes('sandbag')) {
-            if (splitName.includes('out')) {
-                data.stationTimes.lunges = diffSeconds;
+            if (splitName.includes('out') && !splitName.includes('in')) {
+                data.stationTimes.lunges = stationTime;
             }
         } else if (splitName.includes('wall') && splitName.includes('ball')) {
-            if (splitName.includes('out') || splitName.includes('total')) {
+            // Wall balls - use diff if available, or calculate from previous
+            if (splitName.includes('out') || (!splitName.includes('in') && stationTime > 0)) {
+                data.stationTimes.wallBalls = stationTime;
+            }
+        } else if (splitName.includes('total') || (splitName.includes('time') && i === rows.length - 1)) {
+            data.totalTime = cumulativeSeconds;
+        }
+    }
+    
+    // Fallback: If we didn't find some stations, try alternative matching
+    // Sometimes the format is slightly different
+    if (!data.stationTimes.skiErg || !data.stationTimes.sledPush || !data.stationTimes.sledPull) {
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const splitName = row.split.toLowerCase().trim();
+            const diffSeconds = parseTimeToSeconds(row.diff);
+            
+            if (diffSeconds === 0) continue;
+            
+            // More flexible matching
+            if (!data.stationTimes.skiErg && splitName.includes('ski') && splitName.includes('erg') && splitName.includes('out')) {
+                data.stationTimes.skiErg = diffSeconds;
+            }
+            if (!data.stationTimes.sledPush && splitName.includes('sled') && splitName.includes('push') && splitName.includes('out')) {
+                data.stationTimes.sledPush = diffSeconds;
+            }
+            if (!data.stationTimes.sledPull && splitName.includes('sled') && splitName.includes('pull') && splitName.includes('out')) {
+                data.stationTimes.sledPull = diffSeconds;
+            }
+            if (!data.stationTimes.burpee && (splitName.includes('burpee') || (splitName.includes('broad') && splitName.includes('jump'))) && splitName.includes('out')) {
+                data.stationTimes.burpee = diffSeconds;
+            }
+            if (!data.stationTimes.row && splitName.includes('row') && !splitName.includes('rox') && splitName.includes('out')) {
+                data.stationTimes.row = diffSeconds;
+            }
+            if (!data.stationTimes.farmers && (splitName.includes('farmers') || splitName.includes('carry')) && !splitName.includes('sandbag') && splitName.includes('out')) {
+                data.stationTimes.farmers = diffSeconds;
+            }
+            if (!data.stationTimes.lunges && (splitName.includes('lunge') || splitName.includes('sandbag')) && splitName.includes('out')) {
+                data.stationTimes.lunges = diffSeconds;
+            }
+            if (!data.stationTimes.wallBalls && splitName.includes('wall') && splitName.includes('ball')) {
                 data.stationTimes.wallBalls = diffSeconds;
             }
-        } else if (splitName.includes('total') || splitName.includes('finish')) {
-            data.totalTime = cumulativeSeconds;
         }
     }
 
