@@ -19,8 +19,22 @@ async function parseHyResultUrl() {
     statusDiv.innerHTML = '<p style="color: #666;">Fetching and parsing HyResult data...</p>';
 
     try {
-        // Get API endpoint from config
-        const apiEndpoint = window.API_CONFIG?.endpoint?.replace('/api/generate-plan', '/api/parse-hyresult') || '/api/parse-hyresult';
+        // Get API endpoint - use same base URL as generate-plan endpoint
+        let apiEndpoint = '/api/parse-hyresult'; // Default to relative path
+        
+        if (window.API_CONFIG?.endpoint) {
+            const baseEndpoint = window.API_CONFIG.endpoint;
+            // Replace the endpoint path, keeping the base URL
+            if (baseEndpoint.includes('/api/generate-plan')) {
+                apiEndpoint = baseEndpoint.replace('/api/generate-plan', '/api/parse-hyresult');
+            } else if (baseEndpoint.includes('localhost') || baseEndpoint.includes('vercel.app') || baseEndpoint.includes('http')) {
+                // Extract base URL and append parse-hyresult path
+                const baseUrl = baseEndpoint.split('/api/')[0];
+                apiEndpoint = baseUrl + '/api/parse-hyresult';
+            }
+        }
+        
+        console.log('Calling API endpoint:', apiEndpoint);
         
         // Call backend API to parse the URL
         const response = await fetch(apiEndpoint, {
@@ -45,7 +59,14 @@ async function parseHyResultUrl() {
         }
     } catch (error) {
         console.error('HyResult Parse Error:', error);
-        statusDiv.innerHTML = `<div class="csv-error">✗ Error: ${error.message}</div>`;
+        let errorMessage = error.message;
+        
+        // Provide more helpful error messages
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            errorMessage = 'Unable to connect to server. Please check that the backend is deployed and the API endpoint is correct.';
+        }
+        
+        statusDiv.innerHTML = `<div class="csv-error">✗ Error: ${errorMessage}<br><small style="font-size: 0.85rem; opacity: 0.8;">Make sure your Vercel deployment includes the /api/parse-hyresult endpoint</small></div>`;
     }
 }
 
