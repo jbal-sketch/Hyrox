@@ -23,7 +23,8 @@ function generatePlan() {
         // Race info
         raceLocation: document.getElementById('raceLocation').value,
         raceDate: document.getElementById('raceDate').value,
-        raceCategory: document.getElementById('raceCategory').value,
+        raceDivision: document.getElementById('raceDivision').value,
+        ageGroup: document.getElementById('ageGroup').value || null,
         
         // Current performance
         currentTime: timeToSeconds(
@@ -131,6 +132,15 @@ function generatePlanId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 }
 
+function formatDivisionName(division) {
+    return division
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+        .replace('Mens', "Men's")
+        .replace('Womens', "Women's");
+}
+
 function timeToSeconds(hours, minutes, seconds) {
     if (arguments.length === 2) {
         // Backward compatibility: if only 2 args, treat as minutes and seconds
@@ -186,8 +196,8 @@ function displayPlan(data, planId) {
     const timeToFind = data.currentTime - data.targetTime;
     const timeToFindFormatted = formatTime(timeToFind);
     
-    // Get race weights based on category
-    const raceWeights = getRaceWeights(data.raceCategory);
+    // Get race weights based on division
+    const raceWeights = getRaceWeights(data.raceDivision);
     
     // Calculate priorities based on station times
     const priorities = calculatePriorities(data);
@@ -198,7 +208,7 @@ function displayPlan(data, planId) {
     document.body.innerHTML = html;
 }
 
-function getRaceWeights(category) {
+function getRaceWeights(division) {
     const weights = {
         'womens-open': {
             sledPush: 102,
@@ -228,15 +238,78 @@ function getRaceWeights(category) {
             sandbagLunges: 30,
             wallBalls: 9
         },
+        'womens-doubles': {
+            sledPush: 102,
+            sledPull: 78,
+            farmersCarry: 16,
+            sandbagLunges: 10,
+            wallBalls: 4
+        },
+        'mens-doubles': {
+            sledPush: 102,
+            sledPull: 78,
+            farmersCarry: 24,
+            sandbagLunges: 20,
+            wallBalls: 6
+        },
         'mixed-doubles': {
             sledPush: 102,
             sledPull: 78,
             farmersCarry: 20,
             sandbagLunges: 15,
             wallBalls: 5
+        },
+        'womens-pro-doubles': {
+            sledPush: 102,
+            sledPull: 78,
+            farmersCarry: 24,
+            sandbagLunges: 20,
+            wallBalls: 6
+        },
+        'mens-pro-doubles': {
+            sledPush: 102,
+            sledPull: 78,
+            farmersCarry: 32,
+            sandbagLunges: 30,
+            wallBalls: 9
+        },
+        'womens-relay': {
+            sledPush: 102,
+            sledPull: 78,
+            farmersCarry: 16,
+            sandbagLunges: 10,
+            wallBalls: 4
+        },
+        'mens-relay': {
+            sledPush: 102,
+            sledPull: 78,
+            farmersCarry: 24,
+            sandbagLunges: 20,
+            wallBalls: 6
+        },
+        'mixed-relay': {
+            sledPush: 102,
+            sledPull: 78,
+            farmersCarry: 20,
+            sandbagLunges: 15,
+            wallBalls: 5
+        },
+        'womens-adaptive': {
+            sledPush: 102,
+            sledPull: 78,
+            farmersCarry: 16,
+            sandbagLunges: 10,
+            wallBalls: 4
+        },
+        'mens-adaptive': {
+            sledPush: 102,
+            sledPull: 78,
+            farmersCarry: 24,
+            sandbagLunges: 20,
+            wallBalls: 6
         }
     };
-    return weights[category] || weights['womens-open'];
+    return weights[division] || weights['womens-open'];
 }
 
 function calculatePriorities(data) {
@@ -365,7 +438,7 @@ function generatePlanHTML(data, weeks, timeToFind, weights, priorities, planId) 
         ` : ''}
 
         <section class="race-weights">
-            <h2>${data.raceCategory.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} Race Weights</h2>
+            <h2>${formatDivisionName(data.raceDivision)}${data.ageGroup ? ` (${data.ageGroup})` : ''} Race Weights</h2>
             <div class="weights-grid">
                 <div class="weight-item">
                     <h3>Sled Push</h3>

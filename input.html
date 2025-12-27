@@ -161,14 +161,51 @@
                         </script>
                     </div>
                     <div class="form-group">
-                        <label for="raceCategory">Race Category <span class="required">*</span></label>
-                        <select id="raceCategory" name="raceCategory" required>
-                            <option value="womens-open">Women's Open</option>
-                            <option value="mens-open">Men's Open</option>
-                            <option value="womens-pro">Women's Pro</option>
-                            <option value="mens-pro">Men's Pro</option>
-                            <option value="mixed-doubles">Mixed Doubles</option>
+                        <label for="raceDivision">Race Division <span class="required">*</span></label>
+                        <select id="raceDivision" name="raceDivision" required onchange="updateDivisionInfo()">
+                            <optgroup label="Solo Divisions">
+                                <option value="womens-open">Women's Open</option>
+                                <option value="mens-open">Men's Open</option>
+                                <option value="womens-pro">Women's Pro</option>
+                                <option value="mens-pro">Men's Pro</option>
+                            </optgroup>
+                            <optgroup label="Doubles Divisions">
+                                <option value="womens-doubles">Women's Doubles</option>
+                                <option value="mens-doubles">Men's Doubles</option>
+                                <option value="mixed-doubles">Mixed Doubles</option>
+                                <option value="womens-pro-doubles">Women's Pro Doubles</option>
+                                <option value="mens-pro-doubles">Men's Pro Doubles</option>
+                            </optgroup>
+                            <optgroup label="Relay Divisions">
+                                <option value="womens-relay">Women's Relay</option>
+                                <option value="mens-relay">Men's Relay</option>
+                                <option value="mixed-relay">Mixed Relay</option>
+                            </optgroup>
+                            <optgroup label="Adaptive Divisions">
+                                <option value="womens-adaptive">Women's Adaptive</option>
+                                <option value="mens-adaptive">Men's Adaptive</option>
+                            </optgroup>
                         </select>
+                        <div id="divisionWeights" style="margin-top: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 5px; font-size: 0.9rem; color: #666;">
+                            <strong>Division Weights:</strong>
+                            <div id="weightsDisplay"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ageGroup">Age Group (Optional)</label>
+                        <select id="ageGroup" name="ageGroup">
+                            <option value="">No specific age group</option>
+                            <option value="16-24">16-24</option>
+                            <option value="25-29">25-29</option>
+                            <option value="30-34">30-34</option>
+                            <option value="35-39">35-39</option>
+                            <option value="40-44">40-44</option>
+                            <option value="45-49">45-49</option>
+                            <option value="50-54">50-54</option>
+                            <option value="55-59">55-59</option>
+                            <option value="60+">60+</option>
+                        </select>
+                        <div class="help-text">Age groups compete within the same division with same weights</div>
                     </div>
                 </div>
             </section>
@@ -422,6 +459,48 @@
 
     <script src="plan-generator.js"></script>
     <script src="csv-parser.js"></script>
+    <script>
+        // Division weights mapping
+        const divisionWeights = {
+            'womens-open': { sledPush: 102, sledPull: 78, farmersCarry: 16, sandbagLunges: 10, wallBalls: 4 },
+            'mens-open': { sledPush: 102, sledPull: 78, farmersCarry: 24, sandbagLunges: 20, wallBalls: 6 },
+            'womens-pro': { sledPush: 102, sledPull: 78, farmersCarry: 24, sandbagLunges: 20, wallBalls: 6 },
+            'mens-pro': { sledPush: 102, sledPull: 78, farmersCarry: 32, sandbagLunges: 30, wallBalls: 9 },
+            'womens-doubles': { sledPush: 102, sledPull: 78, farmersCarry: 16, sandbagLunges: 10, wallBalls: 4 },
+            'mens-doubles': { sledPush: 102, sledPull: 78, farmersCarry: 24, sandbagLunges: 20, wallBalls: 6 },
+            'mixed-doubles': { sledPush: 102, sledPull: 78, farmersCarry: 20, sandbagLunges: 15, wallBalls: 5 },
+            'womens-pro-doubles': { sledPush: 102, sledPull: 78, farmersCarry: 24, sandbagLunges: 20, wallBalls: 6 },
+            'mens-pro-doubles': { sledPush: 102, sledPull: 78, farmersCarry: 32, sandbagLunges: 30, wallBalls: 9 },
+            'womens-relay': { sledPush: 102, sledPull: 78, farmersCarry: 16, sandbagLunges: 10, wallBalls: 4 },
+            'mens-relay': { sledPush: 102, sledPull: 78, farmersCarry: 24, sandbagLunges: 20, wallBalls: 6 },
+            'mixed-relay': { sledPush: 102, sledPull: 78, farmersCarry: 20, sandbagLunges: 15, wallBalls: 5 },
+            'womens-adaptive': { sledPush: 102, sledPull: 78, farmersCarry: 16, sandbagLunges: 10, wallBalls: 4 },
+            'mens-adaptive': { sledPush: 102, sledPull: 78, farmersCarry: 24, sandbagLunges: 20, wallBalls: 6 }
+        };
+
+        function updateDivisionInfo() {
+            const division = document.getElementById('raceDivision').value;
+            const weights = divisionWeights[division];
+            const display = document.getElementById('weightsDisplay');
+            
+            if (weights) {
+                display.innerHTML = `
+                    <ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem; list-style: none;">
+                        <li>Sled Push: ${weights.sledPush}kg</li>
+                        <li>Sled Pull: ${weights.sledPull}kg</li>
+                        <li>Farmers Carry: 2 x ${weights.farmersCarry}kg (${weights.farmersCarry * 2}kg total)</li>
+                        <li>Sandbag Lunges: ${weights.sandbagLunges}kg</li>
+                        <li>Wall Balls: ${weights.wallBalls}kg</li>
+                    </ul>
+                `;
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDivisionInfo();
+        });
+    </script>
 </body>
 </html>
 
