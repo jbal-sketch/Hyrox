@@ -36,7 +36,20 @@ async function callLLMAPI(prompt) {
         });
 
         if (!response.ok) {
-            throw new Error(`API error: ${response.status} ${response.statusText}`);
+            // Try to get error details from response
+            let errorMessage = `API error: ${response.status} ${response.statusText}`;
+            try {
+                const errorData = await response.json();
+                if (errorData.message) {
+                    errorMessage = errorData.message;
+                }
+                if (errorData.details) {
+                    errorMessage += ` - ${errorData.details}`;
+                }
+            } catch (e) {
+                // If response isn't JSON, use status text
+            }
+            throw new Error(errorMessage);
         }
 
         const data = await response.json();

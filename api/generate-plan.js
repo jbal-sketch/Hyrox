@@ -40,22 +40,31 @@ module.exports = async (req, res) => {
         // Initialize Gemini AI
         const genAI = new GoogleGenerativeAI(apiKey);
 
-        // Get the Gemini model
-        const model = genAI.getGenerativeModel({ 
-            model: 'gemini-pro' // or 'gemini-1.5-pro' for better results
-        });
+        // Get the Gemini model - try gemini-1.5-pro first, fallback to gemini-pro
+        let model;
+        try {
+            model = genAI.getGenerativeModel({ 
+                model: 'gemini-1.5-pro'
+            });
+        } catch (e) {
+            console.log('Falling back to gemini-pro');
+            model = genAI.getGenerativeModel({ 
+                model: 'gemini-pro'
+            });
+        }
 
         // System instruction for the AI
         const systemInstruction = `You are an expert Hyrox coach and training plan designer with deep knowledge of functional fitness, endurance training, and race-specific preparation. You create highly personalized, progressive training plans that help athletes achieve their Hyrox race goals.
 
 Generate a complete, week-by-week Hyrox training plan in HTML format. The plan should be detailed, specific, and actionable. Use the exact HTML structure provided in the prompt.`;
 
+        // Combine system instruction and user prompt
+        const fullPrompt = systemInstruction + '\n\n' + prompt;
+        
+        console.log('Generating plan with prompt length:', fullPrompt.length);
+
         // Generate content
-        const result = await model.generateContent({
-            contents: [{
-                role: 'user',
-                parts: [{ text: systemInstruction + '\n\n' + prompt }]
-            }],
+        const result = await model.generateContent(fullPrompt, {
             generationConfig: {
                 temperature: 0.7,
                 topK: 40,
@@ -75,9 +84,32 @@ Generate a complete, week-by-week Hyrox training plan in HTML format. The plan s
 
     } catch (error) {
         console.error('Gemini API Error:', error);
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        
+        // Provide more detailed error information
+        let errorMessage = error.message || 'Unknown error';
+        let errorDetails = '';
+        
+        if (error.message && error.message.includes('API_KEY')) {
+            errorMessage = 'Gemini API key is invalid or missing';
+            errorDetails = 'Please check that GEMINI_API_KEY is set correctly in Vercel environment variables';
+        } else if (error.message && error.message.includes('quota')) {
+            errorMessage = 'API quota exceeded';
+            errorDetails = 'Gemini API quota has been exceeded. Please check your API usage limits.';
+        } else if (error.message && error.message.includes('model')) {
+            errorMessage = 'Invalid model name';
+            errorDetails = 'The specified Gemini model may not be available. Try using gemini-1.5-pro or gemini-pro';
+        }
+        
         return res.status(500).json({ 
             error: 'Failed to generate training plan',
-            message: error.message 
+            message: errorMessage,
+            details: errorDetails,
+            fullError: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 };
