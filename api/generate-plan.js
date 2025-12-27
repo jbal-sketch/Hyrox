@@ -41,16 +41,28 @@ module.exports = async (req, res) => {
         const genAI = new GoogleGenerativeAI(apiKey);
 
         // Get the Gemini model
-        // Available models: gemini-pro, gemini-1.5-flash, gemini-1.5-pro
-        // Using gemini-1.5-flash as it's faster and free tier friendly
-        // For better quality, use gemini-1.5-pro (may require API key with access)
-        const modelName = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+        // Current available models (as of 2024):
+        // - gemini-pro (original, may be deprecated)
+        // - gemini-1.5-flash (fast, recommended)
+        // - gemini-1.5-pro (may require special access)
+        // Try gemini-1.5-flash first, fallback to gemini-pro
+        let model;
+        let modelName = 'gemini-1.5-flash';
+        
+        try {
+            console.log('Trying model:', modelName);
+            model = genAI.getGenerativeModel({ 
+                model: modelName
+            });
+        } catch (e) {
+            console.log('Model not available, trying gemini-pro');
+            modelName = 'gemini-pro';
+            model = genAI.getGenerativeModel({ 
+                model: modelName
+            });
+        }
         
         console.log('Using Gemini model:', modelName);
-        
-        const model = genAI.getGenerativeModel({ 
-            model: modelName
-        });
 
         // System instruction for the AI
         const systemInstruction = `You are an expert Hyrox coach and training plan designer with deep knowledge of functional fitness, endurance training, and race-specific preparation. You create highly personalized, progressive training plans that help athletes achieve their Hyrox race goals.
@@ -63,11 +75,9 @@ Generate a complete, week-by-week Hyrox training plan in HTML format. The plan s
         console.log('Generating plan with prompt length:', fullPrompt.length);
 
         // Generate content - Gemini API format
+        // The generateContent method accepts text directly or a parts array
         const result = await model.generateContent({
-            contents: [{
-                role: 'user',
-                parts: [{ text: fullPrompt }]
-            }],
+            contents: [{ parts: [{ text: fullPrompt }] }],
             generationConfig: {
                 temperature: 0.7,
                 topK: 40,
