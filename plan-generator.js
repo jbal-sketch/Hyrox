@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function generatePlan() {
+async function generatePlan() {
     // Collect all form data
     const formData = {
         // Race info
@@ -121,10 +121,41 @@ function generatePlan() {
     // Store plan data in localStorage
     localStorage.setItem('hyrox_plan_' + planId, JSON.stringify(formData));
     
-    // Create URL with plan ID
-    const planURL = `plan.html?id=${planId}`;
+    // Generate training plan using LLM
+    try {
+        await generatePlanFromData(formData, planId);
+    } catch (error) {
+        console.error('Error generating plan:', error);
+        handleAPIError(error, planId);
+    }
+}
+
+async function generatePlanFromData(formData, planId) {
+    // Calculate weeks until race
+    const raceDate = new Date(formData.raceDate);
+    const today = new Date();
+    const weeksUntilRace = Math.ceil((raceDate - today) / (1000 * 60 * 60 * 24 * 7));
+    
+    // Get race weights
+    const raceWeights = getRaceWeights(formData.raceDivision);
+    
+    // Calculate priorities
+    const priorities = calculatePriorities(formData);
+    
+    // Build LLM prompt
+    const prompt = buildLLMPrompt(formData, weeksUntilRace, priorities, raceWeights);
+    
+    // Call LLM API to generate plan
+    const trainingPlanHTML = await callLLMAPI(prompt);
+    
+    // Store generated plan HTML
+    localStorage.setItem('hyrox_plan_html_' + planId, trainingPlanHTML);
+    
+    // Hide loading state
+    hideLoadingState();
     
     // Redirect to plan page
+    const planURL = `plan.html?id=${planId}`;
     window.location.href = planURL;
 }
 
@@ -202,10 +233,45 @@ function displayPlan(data, planId) {
     // Calculate priorities based on station times
     const priorities = calculatePriorities(data);
     
-    // Generate HTML
-    const html = generatePlanHTML(data, weeksUntilRace, timeToFindFormatted, raceWeights, priorities, planId);
+    // Check if we have a generated plan HTML
+    const generatedPlanHTML = localStorage.getItem('hyrox_plan_html_' + planId);
     
-    document.body.innerHTML = html;
+    if (generatedPlanHTML) {
+        // Display the LLM-generated plan
+        const overviewHTML = generatePlanHTML(data, weeksUntilRace, timeToFindFormatted, raceWeights, priorities, planId);
+        document.body.innerHTML = overviewHTML;
+        
+        // Insert the generated training plan into the content area
+        const planContentDiv = document.getElementById('training-plan-content');
+        if (planContentDiv) {
+            planContentDiv.innerHTML = generatedPlanHTML;
+        } else {
+            // If div doesn't exist, append after overview sections
+            const container = document.querySelector('.container');
+            const planSection = document.createElement('div');
+            planSection.id = 'training-plan-content';
+            planSection.innerHTML = generatedPlanHTML;
+            container.appendChild(planSection);
+        }
+    } else {
+        // Fallback: Show overview only with message
+        const html = generatePlanHTML(data, weeksUntilRace, timeToFindFormatted, raceWeights, priorities, planId);
+        document.body.innerHTML = html;
+        
+        // Add message about plan generation
+        const container = document.querySelector('.container');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'card';
+        messageDiv.style.marginTop = '2rem';
+        messageDiv.innerHTML = `
+            <h2>Training Plan Generation</h2>
+            <p>The detailed training plan is being generated. Please check back shortly or regenerate your plan.</p>
+            <button onclick="window.location.href='input.html'" style="margin-top: 1rem; padding: 0.75rem 1.5rem; background: var(--primary-color); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                Regenerate Plan
+            </button>
+        `;
+        container.appendChild(messageDiv);
+    }
 }
 
 function getRaceWeights(division) {
@@ -379,7 +445,7 @@ function generatePlanHTML(data, weeks, timeToFind, weights, priorities, planId) 
         <header class="hero">
             <h1>${data.raceLocation} Hyrox</h1>
             <h2>${new Date(data.raceDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</h2>
-            <p class="subtitle">${weeks}-Week Training Plan</p>
+            <p class="subtitle">${formatDivisionName(data.raceDivision)}${data.ageGroup ? ` (${data.ageGroup})` : ''} - ${weeks}-Week Training Plan</p>
             <div style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.2); border-radius: 8px;">
                 <p style="margin: 0.5rem 0;"><strong>Your Plan URL:</strong></p>
                 <input type="text" value="${window.location.href}" readonly style="width: 100%; max-width: 600px; padding: 0.5rem; border-radius: 5px; font-size: 0.9rem;" id="planUrl">
