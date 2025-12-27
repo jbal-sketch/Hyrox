@@ -100,6 +100,25 @@
         .required {
             color: var(--primary-color);
         }
+        .csv-success {
+            color: var(--success);
+            font-weight: bold;
+            padding: 0.5rem;
+            background: #d4edda;
+            border-radius: 5px;
+            margin-top: 0.5rem;
+        }
+        .csv-error {
+            color: var(--primary-color);
+            font-weight: bold;
+            padding: 0.5rem;
+            background: #f8d7da;
+            border-radius: 5px;
+            margin-top: 0.5rem;
+        }
+        label[for="csvFileInput"]:hover {
+            background: var(--secondary-color) !important;
+        }
     </style>
 </head>
 <body>
@@ -234,7 +253,41 @@
             <!-- Previous Race Station Times -->
             <section class="form-section">
                 <h2>Previous Race Station Times (Optional)</h2>
-                <p style="margin-bottom: 1rem; color: #666;">Enter your previous race station times to get personalized improvement targets. Leave blank if this is your first race.</p>
+                <p style="margin-bottom: 1rem; color: #666;">Upload your Hyrox results CSV file or manually enter your previous race station times to get personalized improvement targets. Leave blank if this is your first race.</p>
+                
+                <!-- CSV Upload Section -->
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border: 2px dashed #ddd;">
+                    <div style="text-align: center;">
+                        <h3 style="color: var(--primary-color); margin-bottom: 1rem;">📄 Upload Hyrox Results CSV</h3>
+                        <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleCSVUpload(event)">
+                        <label for="csvFileInput" style="display: inline-block; padding: 1rem 2rem; background: var(--primary-color); color: white; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.3s;">
+                            Choose CSV File
+                        </label>
+                        <p id="csvFileName" style="margin-top: 1rem; color: #666; font-size: 0.9rem;"></p>
+                        <p style="margin-top: 0.5rem; color: #666; font-size: 0.85rem; font-style: italic;">Export your results from the Hyrox website and upload the CSV file here</p>
+                        <details style="margin-top: 1rem; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+                            <summary style="cursor: pointer; color: var(--secondary-color); font-size: 0.9rem;">Expected CSV format</summary>
+                            <div style="background: white; padding: 1rem; margin-top: 0.5rem; border-radius: 5px; font-size: 0.85rem; color: #666;">
+                                <p>The CSV should have columns like: <strong>Split, Time Of Day, Time, Diff</strong></p>
+                                <p>We'll automatically extract station times from rows like:</p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                                    <li>1000m SkiErg Out</li>
+                                    <li>50m Sled Push Out</li>
+                                    <li>50m Sled Pull Out</li>
+                                    <li>80m Burpee Broad Jump Out</li>
+                                    <li>1000m Row Out</li>
+                                    <li>200m Farmers Carry Out</li>
+                                    <li>100m Sandbag Lunges Out</li>
+                                    <li>Wall Balls (or Total)</li>
+                                </ul>
+                            </div>
+                        </details>
+                    </div>
+                    <div id="csvUploadStatus" style="margin-top: 1rem; text-align: center;"></div>
+                </div>
+
+                <div style="text-align: center; margin: 1rem 0; color: #666; font-weight: bold;">OR</div>
+
                 <div class="station-times">
                     <div class="station-time-group">
                         <label for="skiErgTime">1000m SkiErg (MM:SS)</label>
@@ -368,6 +421,7 @@
     </footer>
 
     <script src="plan-generator.js"></script>
+    <script src="csv-parser.js"></script>
 </body>
 </html>
 
