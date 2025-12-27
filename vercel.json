@@ -2,6 +2,9 @@
   "functions": {
     "api/generate-plan.js": {
       "maxDuration": 60
+    },
+    "api/parse-hyresult.js": {
+      "maxDuration": 30
     }
   }
 }
