@@ -1,7 +1,6 @@
 // Vercel Serverless Function for Gemini API
 // This file will be deployed as a serverless function on Vercel
-
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+// Uses REST API directly instead of SDK for better compatibility
 
 module.exports = async (req, res) => {
     // Enable CORS
@@ -37,44 +36,15 @@ module.exports = async (req, res) => {
             });
         }
 
-        // Initialize Gemini AI
-        const genAI = new GoogleGenerativeAI(apiKey);
-
-        // Get the Gemini model
-        // Try multiple model names in order of preference
-        // Model names that should work: gemini-pro, gemini-1.5-flash, gemini-1.5-pro
+        // Get model name from environment or use default
+        // Try gemini-2.5-flash first (newest), fallback to others
         const modelsToTry = [
             process.env.GEMINI_MODEL, // User-specified model first
-            'gemini-1.5-flash',       // Fast and free tier friendly
-            'gemini-pro',             // Original model
-            'gemini-1.5-pro'          // Higher quality if available
+            'gemini-2.5-flash',       // Newest model
+            'gemini-1.5-flash',       // Fast and reliable
+            'gemini-1.5-pro',         // Higher quality
+            'gemini-pro'              // Original fallback
         ].filter(Boolean); // Remove undefined values
-        
-        console.log('Trying models in order:', modelsToTry);
-        
-        let model;
-        let modelName;
-        let lastError;
-        
-        for (const testModelName of modelsToTry) {
-            try {
-                console.log(`Attempting to use model: ${testModelName}`);
-                model = genAI.getGenerativeModel({ 
-                    model: testModelName
-                });
-                modelName = testModelName;
-                console.log(`Successfully initialized model: ${modelName}`);
-                break;
-            } catch (modelError) {
-                console.log(`Model ${testModelName} failed:`, modelError.message);
-                lastError = modelError;
-                continue;
-            }
-        }
-        
-        if (!model) {
-            throw new Error(`None of the available models worked. Last error: ${lastError?.message || 'Unknown error'}. Please check your API key has access to Gemini models.`);
-        }
 
         // System instruction for the AI
         const systemInstruction = `You are an expert Hyrox coach and training plan designer with deep knowledge of functional fitness, endurance training, and race-specific preparation. You create highly personalized, progressive training plans that help athletes achieve their Hyrox race goals.
@@ -85,30 +55,72 @@ Generate a complete, week-by-week Hyrox training plan in HTML format. The plan s
         const fullPrompt = systemInstruction + '\n\n' + prompt;
         
         console.log('Generating plan with prompt length:', fullPrompt.length);
+        console.log('Trying models in order:', modelsToTry);
 
-        // Generate content - Gemini API format
-        // Use the standard format with contents array
-        const result = await model.generateContent({
-            contents: [{
-                role: 'user',
-                parts: [{ text: fullPrompt }]
-            }],
-            generationConfig: {
-                temperature: 0.7,
-                topK: 40,
-                topP: 0.95,
-                maxOutputTokens: 8192,
-            },
-        });
+        // Try each model until one works
+        let lastError;
+        for (const modelName of modelsToTry) {
+            try {
+                console.log(`Attempting to use model: ${modelName}`);
+                
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
+                
+                const payload = {
+                    contents: [{
+                        parts: [{
+                            text: fullPrompt
+                        }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.7,
+                        topK: 40,
+                        topP: 0.95,
+                        maxOutputTokens: 8192,
+                    }
+                };
 
-        const response = await result.response;
-        const generatedHTML = response.text();
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-        // Return the generated HTML
-        return res.status(200).json({ 
-            html: generatedHTML,
-            success: true 
-        });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+                    console.log(`Model ${modelName} failed: ${errorMsg}`);
+                    lastError = new Error(errorMsg);
+                    continue; // Try next model
+                }
+
+                const data = await response.json();
+                
+                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                    throw new Error('Invalid response format from Gemini API');
+                }
+
+                const generatedHTML = data.candidates[0].content.parts[0].text;
+                
+                console.log(`Successfully generated plan using model: ${modelName}`);
+
+                // Return the generated HTML
+                return res.status(200).json({ 
+                    html: generatedHTML,
+                    success: true,
+                    model: modelName
+                });
+
+            } catch (error) {
+                console.log(`Model ${modelName} error:`, error.message);
+                lastError = error;
+                continue; // Try next model
+            }
+        }
+
+        // If we get here, all models failed
+        throw new Error(`All models failed. Last error: ${lastError?.message || 'Unknown error'}`);
 
     } catch (error) {
         console.error('Gemini API Error:', error);
@@ -122,7 +134,7 @@ Generate a complete, week-by-week Hyrox training plan in HTML format. The plan s
         let errorMessage = error.message || 'Unknown error';
         let errorDetails = '';
         
-        if (error.message && error.message.includes('API_KEY')) {
+        if (error.message && error.message.includes('API_KEY') || error.message && error.message.includes('API key')) {
             errorMessage = 'Gemini API key is invalid or missing';
             errorDetails = 'Please check that GEMINI_API_KEY is set correctly in Vercel environment variables';
         } else if (error.message && error.message.includes('quota')) {
@@ -130,7 +142,10 @@ Generate a complete, week-by-week Hyrox training plan in HTML format. The plan s
             errorDetails = 'Gemini API quota has been exceeded. Please check your API usage limits.';
         } else if (error.message && error.message.includes('model') || error.message && error.message.includes('Model')) {
             errorMessage = 'Invalid model name or model not accessible';
-            errorDetails = `The model "${process.env.GEMINI_MODEL || 'gemini-pro'}" is not available with your API key. Your API key may need to be enabled for specific models, or the model name may have changed. Check the Gemini API documentation for current model names.`;
+            errorDetails = 'None of the tested models are available with your API key. Check the Gemini API documentation for current model names.';
+        } else if (error.message && error.message.includes('All models failed')) {
+            errorMessage = 'All Gemini models failed';
+            errorDetails = error.message;
         }
         
         return res.status(500).json({ 

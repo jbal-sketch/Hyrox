@@ -1,7 +1,6 @@
 // Vercel Serverless Function to test Gemini models
 // This endpoint allows testing which models work with an API key
-
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+// Uses REST API directly instead of SDK
 
 module.exports = async (req, res) => {
     // Enable CORS
@@ -29,30 +28,45 @@ module.exports = async (req, res) => {
             });
         }
 
-        // Initialize Gemini AI with provided key
-        const genAI = new GoogleGenerativeAI(apiKey);
-
-        // Try to get the model
-        const geminiModel = genAI.getGenerativeModel({ 
-            model: model
-        });
-
         // Test with a simple prompt
         const prompt = testPrompt || "Say 'Hello, this model works!' in one sentence.";
         
-        const result = await geminiModel.generateContent({
+        // Use REST API directly
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        
+        const payload = {
             contents: [{
-                role: 'user',
-                parts: [{ text: prompt }]
+                parts: [{
+                    text: prompt
+                }]
             }],
             generationConfig: {
                 temperature: 0.7,
                 maxOutputTokens: 100,
+            }
+        };
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
             },
+            body: JSON.stringify(payload)
         });
 
-        const response = await result.response;
-        const text = response.text();
+        if (!response.ok) {
+            const errorData = await response.json();
+            const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+            throw new Error(errorMsg);
+        }
+
+        const data = await response.json();
+        
+        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+            throw new Error('Invalid response format from Gemini API');
+        }
+
+        const text = data.candidates[0].content.parts[0].text;
 
         return res.status(200).json({ 
             success: true,
@@ -66,7 +80,7 @@ module.exports = async (req, res) => {
         let errorMessage = error.message || 'Unknown error';
         
         // Provide more specific error messages
-        if (error.message && error.message.includes('API_KEY')) {
+        if (error.message && (error.message.includes('API_KEY') || error.message.includes('API key'))) {
             errorMessage = 'Invalid API key';
         } else if (error.message && (error.message.includes('model') || error.message.includes('Model'))) {
             errorMessage = `Model "${req.body.model}" is not available or invalid`;
