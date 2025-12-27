@@ -290,7 +290,26 @@
             <!-- Previous Race Station Times -->
             <section class="form-section">
                 <h2>Previous Race Station Times (Optional)</h2>
-                <p style="margin-bottom: 1rem; color: #666;">Upload your Hyrox results CSV file or manually enter your previous race station times to get personalized improvement targets. Leave blank if this is your first race.</p>
+                <p style="margin-bottom: 1rem; color: #666;">Provide your HyResult URL, upload a CSV file, or manually enter your previous race station times to get personalized improvement targets. Leave blank if this is your first race.</p>
+                
+                <!-- HyResult URL Section -->
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border: 2px dashed #ddd;">
+                    <div style="text-align: center;">
+                        <h3 style="color: var(--primary-color); margin-bottom: 1rem;">🔗 Enter HyResult URL</h3>
+                        <div style="max-width: 600px; margin: 0 auto;">
+                            <input type="url" id="hyresultUrl" placeholder="https://www.hyresult.com/result/..." 
+                                   style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem; margin-bottom: 1rem;">
+                            <button type="button" onclick="parseHyResultUrl()" 
+                                    style="padding: 1rem 2rem; background: var(--primary-color); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.3s;">
+                                Parse HyResult Data
+                            </button>
+                        </div>
+                        <p id="hyresultStatus" style="margin-top: 1rem; color: #666; font-size: 0.9rem;"></p>
+                        <p style="margin-top: 0.5rem; color: #666; font-size: 0.85rem; font-style: italic;">Paste your HyResult race results URL to automatically import your times</p>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin: 1rem 0; color: #666; font-weight: bold;">OR</div>
                 
                 <!-- CSV Upload Section -->
                 <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border: 2px dashed #ddd;">
@@ -462,6 +481,7 @@
     <script src="llm-api.js"></script>
     <script src="plan-generator.js"></script>
     <script src="csv-parser.js"></script>
+    <script src="hyresult-parser.js"></script>
     <script>
         // Division weights mapping
         const divisionWeights = {
