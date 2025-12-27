@@ -187,6 +187,126 @@
         label[for="csvFileInput"]:hover {
             background: var(--secondary-color) !important;
         }
+        /* Debug Modal Styles */
+        .debug-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            overflow: auto;
+        }
+        .debug-modal-content {
+            background-color: #fefefe;
+            margin: 2% auto;
+            padding: 0;
+            border: 2px solid var(--primary-color);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .debug-modal-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .debug-modal-header h2 {
+            margin: 0;
+            color: white;
+            font-size: 1.5rem;
+        }
+        .debug-modal-close {
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+        .debug-modal-close:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .debug-modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .debug-prompt-container {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 60vh;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+        .debug-modal-actions {
+            padding: 1rem 1.5rem;
+            background: #f8f9fa;
+            border-top: 1px solid #ddd;
+            border-radius: 0 0 10px 10px;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        .debug-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .debug-btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        .debug-btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        .debug-btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .debug-btn-secondary:hover {
+            background: #5a6268;
+        }
+        .debug-copy-btn {
+            background: #28a745;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        .debug-copy-btn:hover {
+            background: #218838;
+        }
     </style>
 </head>
 <body>
@@ -331,8 +451,8 @@
                 </div>
             </section>
 
-            <!-- Body Composition -->
-            <section class="form-section">
+            <!-- Body Composition - Hidden for now -->
+            <section class="form-section" style="display: none;">
                 <h2>Body Composition <span style="font-size: 0.8em; font-weight: normal; color: #666;">(Optional)</span></h2>
                 <p style="margin-bottom: 1rem; color: #666; font-size: 0.9rem;">Provide your body composition goals to get personalized nutrition guidance. Leave blank if not applicable.</p>
                 <div class="form-row">
@@ -540,9 +660,43 @@
                 </div>
             </section>
 
+            <!-- Debug Mode Toggle -->
+            <section class="form-section" style="background: #fff3cd; border: 2px solid #ffc107;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <input type="checkbox" id="debugMode" name="debugMode" style="width: 24px; height: 24px; cursor: pointer;">
+                    <label for="debugMode" style="font-weight: bold; color: #856404; cursor: pointer; margin: 0;">
+                        🔧 Debug Mode: Show prompt in modal before generating plan
+                    </label>
+                </div>
+                <p style="margin-top: 0.5rem; color: #856404; font-size: 0.9rem;">
+                    Enable this to see the exact prompt that will be sent to the AI. Useful for testing and debugging.
+                </p>
+            </section>
+
             <button type="submit" class="generate-btn">Generate My Training Plan</button>
         </form>
     </main>
+
+    <!-- Debug Modal -->
+    <div id="debugModal" class="debug-modal">
+        <div class="debug-modal-content">
+            <div class="debug-modal-header">
+                <h2>🔧 Debug Mode: Generated Prompt</h2>
+                <span class="debug-modal-close" onclick="closeDebugModal()">&times;</span>
+            </div>
+            <div class="debug-modal-body">
+                <p style="margin-bottom: 1rem; color: #666;">
+                    This is the exact prompt that will be sent to the AI. Review it and click "Generate Plan" to proceed, or "Cancel" to go back and edit your inputs.
+                </p>
+                <button class="debug-copy-btn" onclick="copyPromptToClipboard()">📋 Copy Prompt to Clipboard</button>
+                <div id="debugPromptContent" class="debug-prompt-container"></div>
+            </div>
+            <div class="debug-modal-actions">
+                <button class="debug-btn debug-btn-secondary" onclick="closeDebugModal()">Cancel</button>
+                <button class="debug-btn debug-btn-primary" onclick="proceedWithGeneration()">Generate Plan</button>
+            </div>
+        </div>
+    </div>
 
     <footer>
         <p>&copy; 2024 Hyrox Training Plan Generator</p>
@@ -595,6 +749,69 @@
         document.addEventListener('DOMContentLoaded', function() {
             updateDivisionInfo();
         });
+        
+        // Make debug modal functions globally available
+        window.closeDebugModal = function() {
+            const modal = document.getElementById('debugModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        };
+        
+        window.copyPromptToClipboard = function() {
+            const promptContent = document.getElementById('debugPromptContent');
+            if (promptContent) {
+                const prompt = promptContent.textContent || promptContent.innerText;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(prompt).then(() => {
+                        alert('✅ Prompt copied to clipboard!');
+                    }).catch(err => {
+                        console.error('Failed to copy:', err);
+                        fallbackCopy(prompt);
+                    });
+                } else {
+                    fallbackCopy(prompt);
+                }
+            }
+        };
+        
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            textArea.style.left = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert('✅ Prompt copied to clipboard!');
+            } catch (err) {
+                alert('❌ Failed to copy. Please select and copy manually.');
+            }
+            document.body.removeChild(textArea);
+        }
+        
+        window.proceedWithGeneration = function() {
+            // This will be handled by plan-generator.js
+            const event = new Event('proceedGeneration');
+            window.dispatchEvent(event);
+        };
+        
+        // Listen for proceed event
+        window.addEventListener('proceedGeneration', function() {
+            // Close modal first
+            closeDebugModal();
+            // The actual generation will continue in plan-generator.js
+        });
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('debugModal');
+            if (event.target === modal) {
+                closeDebugModal();
+            }
+        };
     </script>
 </body>
 </html>

@@ -118,18 +118,26 @@ async function generatePlan() {
         formData.target5K = Math.round(formData.current5K * (1 - timeImprovement * 0.3));
     }
 
+    // Check if debug mode is enabled
+    const debugMode = document.getElementById('debugMode')?.checked || false;
+    
     // Generate unique ID
     const planId = generatePlanId();
     
     // Store plan data in localStorage
     localStorage.setItem('hyrox_plan_' + planId, JSON.stringify(formData));
     
-    // Generate training plan using LLM
-    try {
-        await generatePlanFromData(formData, planId);
-    } catch (error) {
-        console.error('Error generating plan:', error);
-        handleAPIError(error, planId);
+    if (debugMode) {
+        // Show prompt in debug modal
+        showDebugModal(formData, planId);
+    } else {
+        // Generate training plan using LLM directly
+        try {
+            await generatePlanFromData(formData, planId);
+        } catch (error) {
+            console.error('Error generating plan:', error);
+            handleAPIError(error, planId);
+        }
     }
 }
 
@@ -425,6 +433,94 @@ function calculatePriorities(data) {
     
     return priorities;
 }
+
+// Debug modal functions
+let pendingFormData = null;
+let pendingPlanId = null;
+
+function showDebugModal(formData, planId) {
+    // Calculate weeks until race
+    const raceDate = new Date(formData.raceDate);
+    const today = new Date();
+    const weeksUntilRace = Math.ceil((raceDate - today) / (1000 * 60 * 60 * 24 * 7));
+    
+    // Get race weights
+    const raceWeights = getRaceWeights(formData.raceDivision);
+    
+    // Calculate priorities
+    const priorities = calculatePriorities(formData);
+    
+    // Build LLM prompt
+    const prompt = buildLLMPrompt(formData, weeksUntilRace, priorities, raceWeights);
+    
+    // Store for later use
+    pendingFormData = formData;
+    pendingPlanId = planId;
+    
+    // Display prompt in modal
+    const modal = document.getElementById('debugModal');
+    const promptContent = document.getElementById('debugPromptContent');
+    
+    if (modal && promptContent) {
+        promptContent.textContent = prompt;
+        modal.style.display = 'block';
+        
+        // Store prompt for copy function
+        promptContent.dataset.prompt = prompt;
+    } else {
+        console.error('Debug modal elements not found');
+        // Fallback: proceed without modal
+        proceedWithGeneration();
+    }
+}
+
+function closeDebugModal() {
+    const modal = document.getElementById('debugModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    pendingFormData = null;
+    pendingPlanId = null;
+}
+
+function copyPromptToClipboard() {
+    const promptContent = document.getElementById('debugPromptContent');
+    if (promptContent && promptContent.dataset.prompt) {
+        const prompt = promptContent.dataset.prompt;
+        navigator.clipboard.writeText(prompt).then(() => {
+            alert('Prompt copied to clipboard!');
+        }).catch(err => {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = prompt;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            alert('Prompt copied to clipboard!');
+        });
+    }
+}
+
+async function proceedWithGeneration() {
+    closeDebugModal();
+    
+    if (pendingFormData && pendingPlanId) {
+        try {
+            await generatePlanFromData(pendingFormData, pendingPlanId);
+        } catch (error) {
+            console.error('Error generating plan:', error);
+            handleAPIError(error, pendingPlanId);
+        }
+    }
+}
+
+// Listen for proceed event from input.html
+window.addEventListener('proceedGeneration', function() {
+    proceedWithGeneration();
+});
 
 function generatePlanHTML(data, weeks, timeToFind, weights, priorities, planId) {
     const currentTimeFormatted = formatTime(data.currentTime);
