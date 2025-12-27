@@ -106,7 +106,10 @@ async function generatePlan() {
         gymDays: parseInt(document.getElementById('gymDays').value),
         
         // Equipment
-        equipment: Array.from(document.querySelectorAll('input[name="equipment"]:checked')).map(cb => cb.value)
+        equipment: Array.from(document.querySelectorAll('input[name="equipment"]:checked')).map(cb => cb.value),
+        
+        // HyResult URL (if provided)
+        hyresultUrl: document.getElementById('hyresultUrl')?.value?.trim() || null
     };
 
     // Auto-calculate target 5K if not provided
@@ -447,9 +450,18 @@ function generatePlanHTML(data, weeks, timeToFind, weights, priorities, planId) 
             <h2>${new Date(data.raceDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</h2>
             <p class="subtitle">${formatDivisionName(data.raceDivision)}${data.ageGroup ? ` (${data.ageGroup})` : ''} - ${weeks}-Week Training Plan</p>
             <div style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.2); border-radius: 8px;">
-                <p style="margin: 0.5rem 0;"><strong>Your Plan URL:</strong></p>
+                <p style="margin: 0.5rem 0;"><strong>Share Your Plan:</strong></p>
+                <p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Share this URL with coaches, training partners, or friends:</p>
                 <input type="text" value="${window.location.href}" readonly style="width: 100%; max-width: 600px; padding: 0.5rem; border-radius: 5px; font-size: 0.9rem;" id="planUrl">
-                <button onclick="copyPlanUrl()" style="margin-top: 0.5rem; padding: 0.5rem 1.5rem; background: white; color: var(--primary-color); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Copy URL</button>
+                <button onclick="copyPlanUrl()" style="margin-top: 0.5rem; padding: 0.5rem 1.5rem; background: white; color: var(--primary-color); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Copy Plan URL</button>
+                ${data.hyresultUrl ? `
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.3);">
+                    <p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;"><strong>Your HyResult Link:</strong></p>
+                    <input type="text" value="${data.hyresultUrl}" readonly style="width: 100%; max-width: 600px; padding: 0.5rem; border-radius: 5px; font-size: 0.9rem; background: rgba(255,255,255,0.9);" id="hyresultUrlDisplay">
+                    <button onclick="copyHyResultUrl()" style="margin-top: 0.5rem; padding: 0.5rem 1.5rem; background: white; color: var(--secondary-color); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Copy HyResult URL</button>
+                    <p style="font-size: 0.85rem; opacity: 0.8; margin-top: 0.5rem; font-style: italic;">You can share your HyResult link to show your race results!</p>
+                </div>
+                ` : ''}
             </div>
         </header>
 
@@ -556,6 +568,16 @@ function generatePlanHTML(data, weeks, timeToFind, weights, priorities, planId) 
             urlInput.setSelectionRange(0, 99999);
             document.execCommand('copy');
             alert('Plan URL copied to clipboard!');
+        }
+        
+        function copyHyResultUrl() {
+            const urlInput = document.getElementById('hyresultUrlDisplay');
+            if (urlInput) {
+                urlInput.select();
+                urlInput.setSelectionRange(0, 99999);
+                document.execCommand('copy');
+                alert('HyResult URL copied to clipboard!');
+            }
         }
     </script>
     `;
