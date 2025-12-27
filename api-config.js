@@ -25,7 +25,7 @@ const API_CONFIG = {
     // endpoint: 'https://your-backend-domain.com/api/generate-plan',
     
     // Model settings (used by backend)
-    model: 'gemini-pro',
+    model: 'gemini-2.5-flash',
     temperature: 0.7,
     maxTokens: 8000,
     timeout: 120000 // 2 minutes

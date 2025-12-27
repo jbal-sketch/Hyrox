@@ -37,13 +37,10 @@ module.exports = async (req, res) => {
         }
 
         // Get model name from environment or use default
-        // Try gemini-2.5-flash first (newest), fallback to others
+        // Use only gemini-2.5-flash
         const modelsToTry = [
-            process.env.GEMINI_MODEL, // User-specified model first
-            'gemini-1.5-flash',       // Most reliable and widely available
-            'gemini-1.5-pro',         // Higher quality
-            'gemini-pro',             // Original fallback
-            'gemini-2.5-flash'        // Newest (may not be available yet)
+            process.env.GEMINI_MODEL || 'gemini-2.5-flash', // Use environment variable or default to gemini-2.5-flash
+            'gemini-2.5-flash'        // Only model to use
         ].filter(Boolean); // Remove undefined values
 
         // System instruction for the AI

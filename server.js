@@ -29,7 +29,7 @@ app.post('/api/generate-plan', async (req, res) => {
 
         // Get the Gemini model
         const model = genAI.getGenerativeModel({ 
-            model: 'gemini-pro' // or 'gemini-1.5-pro' for better results
+            model: process.env.GEMINI_MODEL || 'gemini-2.5-flash' // Use gemini-2.5-flash
         });
 
         // System instruction for the AI
