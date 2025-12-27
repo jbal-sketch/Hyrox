@@ -100,6 +100,74 @@
         .required {
             color: var(--primary-color);
         }
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .equipment-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .equipment-checkbox:hover {
+            background: #e9ecef;
+            border-color: var(--primary-color);
+        }
+        .equipment-checkbox input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+        .checkmark {
+            height: 24px;
+            width: 24px;
+            background-color: white;
+            border: 2px solid #666;
+            border-radius: 4px;
+            margin-right: 0.75rem;
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+        .equipment-checkbox:hover .checkmark {
+            border-color: var(--primary-color);
+        }
+        .equipment-checkbox input:checked ~ .checkmark {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .equipment-checkbox input:checked ~ .checkmark:after {
+            content: "";
+            position: absolute;
+            display: block;
+            left: 7px;
+            top: 3px;
+            width: 6px;
+            height: 12px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        .equipment-label {
+            font-size: 1rem;
+            color: var(--text-dark);
+            font-weight: 500;
+            user-select: none;
+        }
+        .equipment-checkbox input:checked ~ .equipment-label {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
         .csv-success {
             color: var(--success);
             font-weight: bold;
@@ -437,37 +505,37 @@
             <!-- Equipment Available -->
             <section class="form-section">
                 <h2>Available Equipment</h2>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" name="equipment" value="dumbbells" checked> Dumbbells
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" name="equipment" value="treadmill" checked> Treadmill
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" name="equipment" value="bench"> Bench
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" name="equipment" value="kettlebells"> Kettlebells
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" name="equipment" value="pullup-bar"> Pull-up Bar
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" name="equipment" value="barbell"> Barbell
-                        </label>
-                    </div>
+                <div class="equipment-grid">
+                    <label class="equipment-checkbox">
+                        <input type="checkbox" name="equipment" value="dumbbells" checked>
+                        <span class="checkmark"></span>
+                        <span class="equipment-label">Dumbbells</span>
+                    </label>
+                    <label class="equipment-checkbox">
+                        <input type="checkbox" name="equipment" value="treadmill" checked>
+                        <span class="checkmark"></span>
+                        <span class="equipment-label">Treadmill</span>
+                    </label>
+                    <label class="equipment-checkbox">
+                        <input type="checkbox" name="equipment" value="bench">
+                        <span class="checkmark"></span>
+                        <span class="equipment-label">Bench</span>
+                    </label>
+                    <label class="equipment-checkbox">
+                        <input type="checkbox" name="equipment" value="kettlebells">
+                        <span class="checkmark"></span>
+                        <span class="equipment-label">Kettlebells</span>
+                    </label>
+                    <label class="equipment-checkbox">
+                        <input type="checkbox" name="equipment" value="pullup-bar">
+                        <span class="checkmark"></span>
+                        <span class="equipment-label">Pull-up Bar</span>
+                    </label>
+                    <label class="equipment-checkbox">
+                        <input type="checkbox" name="equipment" value="barbell">
+                        <span class="checkmark"></span>
+                        <span class="equipment-label">Barbell</span>
+                    </label>
                 </div>
             </section>
 
