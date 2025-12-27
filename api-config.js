@@ -1,24 +1,18 @@
 // API Configuration
-// Update this file with your LLM API endpoint
+// Backend proxy endpoint - API key is stored securely on the server
 
 const API_CONFIG = {
-    // Your LLM API endpoint
-    // Options:
-    // 1. Backend proxy endpoint (recommended for security)
-    endpoint: '/api/generate-plan',
+    // Backend proxy endpoint (API key is secure on server)
+    // For local development:
+    endpoint: 'http://localhost:3000/api/generate-plan',
     
-    // 2. Direct OpenAI API (uncomment and configure)
-    // endpoint: 'https://api.openai.com/v1/chat/completions',
-    // provider: 'openai',
-    // apiKey: 'your-api-key-here', // Store securely, not in client code
+    // For production, update to your server URL:
+    // endpoint: 'https://your-domain.com/api/generate-plan',
+    // Or use relative path if same domain:
+    // endpoint: '/api/generate-plan',
     
-    // 3. Direct Anthropic API (uncomment and configure)
-    // endpoint: 'https://api.anthropic.com/v1/messages',
-    // provider: 'anthropic',
-    // apiKey: 'your-api-key-here',
-    
-    // Model settings
-    model: 'gpt-4-turbo', // or 'claude-3-opus-20240229', etc.
+    // Model settings (used by backend)
+    model: 'gemini-pro',
     temperature: 0.7,
     maxTokens: 8000,
     timeout: 120000 // 2 minutes
@@ -26,4 +20,3 @@ const API_CONFIG = {
 
 // Make config available globally
 window.API_CONFIG = API_CONFIG;
-
