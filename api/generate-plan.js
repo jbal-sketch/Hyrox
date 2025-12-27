@@ -75,9 +75,9 @@ Generate a complete, week-by-week Hyrox training plan in HTML format. The plan s
         console.log('Generating plan with prompt length:', fullPrompt.length);
 
         // Generate content - Gemini API format
-        // The generateContent method accepts text directly or a parts array
-        const result = await model.generateContent({
-            contents: [{ parts: [{ text: fullPrompt }] }],
+        // The generateContent method can accept text directly or use the parts format
+        // Try the simpler text format first
+        const result = await model.generateContent(fullPrompt, {
             generationConfig: {
                 temperature: 0.7,
                 topK: 40,
