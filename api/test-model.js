@@ -55,9 +55,32 @@ module.exports = async (req, res) => {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
-            throw new Error(errorMsg);
+            let errorMsg = `HTTP ${response.status}`;
+            let errorDetails = {};
+            
+            try {
+                const errorData = await response.json();
+                errorMsg = errorData.error?.message || errorData.error?.status || errorMsg;
+                errorDetails = errorData.error || {};
+                console.log('API Error:', {
+                    status: response.status,
+                    message: errorMsg,
+                    details: errorDetails
+                });
+            } catch (parseError) {
+                try {
+                    const errorText = await response.text();
+                    errorMsg = errorText || errorMsg;
+                    console.log('Non-JSON error response:', errorText);
+                } catch (textError) {
+                    console.log('Could not parse error response');
+                }
+            }
+            
+            const fullError = new Error(errorMsg);
+            fullError.details = errorDetails;
+            fullError.status = response.status;
+            throw fullError;
         }
 
         const data = await response.json();
@@ -80,14 +103,24 @@ module.exports = async (req, res) => {
         let errorMessage = error.message || 'Unknown error';
         
         // Provide more specific error messages
-        if (error.message && (error.message.includes('API_KEY') || error.message.includes('API key'))) {
+        const errorMsg = error.message || '';
+        
+        if (errorMsg.includes('API_KEY') || errorMsg.includes('API key') || errorMsg.includes('API_KEY_INVALID')) {
             errorMessage = 'Invalid API key';
-        } else if (error.message && (error.message.includes('model') || error.message.includes('Model'))) {
+        } else if (errorMsg.includes('model') || errorMsg.includes('Model') || errorMsg.includes('MODEL_NOT_FOUND') || error.status === 400) {
             errorMessage = `Model "${req.body.model}" is not available or invalid`;
-        } else if (error.message && error.message.includes('quota')) {
+            if (error.details) {
+                errorMessage += ` - ${JSON.stringify(error.details)}`;
+            }
+        } else if (errorMsg.includes('quota') || errorMsg.includes('QUOTA') || error.status === 429) {
             errorMessage = 'API quota exceeded';
-        } else if (error.message && error.message.includes('permission')) {
+        } else if (errorMsg.includes('permission') || errorMsg.includes('PERMISSION_DENIED') || error.status === 403) {
             errorMessage = 'Permission denied for this model';
+        } else {
+            errorMessage = errorMsg || 'Unknown error';
+            if (error.details) {
+                errorMessage += ` (Details: ${JSON.stringify(error.details)})`;
+            }
         }
         
         return res.status(200).json({ 

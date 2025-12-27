@@ -88,10 +88,32 @@ Generate a complete, week-by-week Hyrox training plan in HTML format. The plan s
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
-                    console.log(`Model ${modelName} failed: ${errorMsg}`);
+                    let errorMsg = `HTTP ${response.status}`;
+                    let errorDetails = {};
+                    
+                    try {
+                        const errorData = await response.json();
+                        errorMsg = errorData.error?.message || errorData.error?.status || errorMsg;
+                        errorDetails = errorData.error || {};
+                        console.log(`Model ${modelName} failed:`, {
+                            status: response.status,
+                            message: errorMsg,
+                            details: errorDetails
+                        });
+                    } catch (parseError) {
+                        // If response isn't JSON, try to get text
+                        try {
+                            const errorText = await response.text();
+                            errorMsg = errorText || errorMsg;
+                            console.log(`Model ${modelName} failed with non-JSON response:`, errorText);
+                        } catch (textError) {
+                            console.log(`Model ${modelName} failed: HTTP ${response.status} ${response.statusText}`);
+                        }
+                    }
+                    
                     lastError = new Error(errorMsg);
+                    lastError.details = errorDetails;
+                    lastError.status = response.status;
                     continue; // Try next model
                 }
 
@@ -113,14 +135,25 @@ Generate a complete, week-by-week Hyrox training plan in HTML format. The plan s
                 });
 
             } catch (error) {
-                console.log(`Model ${modelName} error:`, error.message);
+                console.log(`Model ${modelName} error:`, {
+                    message: error.message,
+                    stack: error.stack,
+                    name: error.name
+                });
                 lastError = error;
                 continue; // Try next model
             }
         }
 
         // If we get here, all models failed
-        throw new Error(`All models failed. Last error: ${lastError?.message || 'Unknown error'}`);
+        const allErrors = `All models failed. Last error: ${lastError?.message || 'Unknown error'}`;
+        console.error('All models failed:', {
+            modelsTried: modelsToTry,
+            lastError: lastError?.message,
+            lastErrorDetails: lastError?.details,
+            lastErrorStatus: lastError?.status
+        });
+        throw new Error(allErrors);
 
     } catch (error) {
         console.error('Gemini API Error:', error);
@@ -134,18 +167,27 @@ Generate a complete, week-by-week Hyrox training plan in HTML format. The plan s
         let errorMessage = error.message || 'Unknown error';
         let errorDetails = '';
         
-        if (error.message && error.message.includes('API_KEY') || error.message && error.message.includes('API key')) {
+        // Check for specific error types from Gemini API
+        const lastErrorMsg = error.message || '';
+        
+        if (lastErrorMsg.includes('API_KEY') || lastErrorMsg.includes('API key') || lastErrorMsg.includes('API_KEY_INVALID')) {
             errorMessage = 'Gemini API key is invalid or missing';
             errorDetails = 'Please check that GEMINI_API_KEY is set correctly in Vercel environment variables';
-        } else if (error.message && error.message.includes('quota')) {
+        } else if (lastErrorMsg.includes('quota') || lastErrorMsg.includes('QUOTA') || lastErrorMsg.includes('429')) {
             errorMessage = 'API quota exceeded';
             errorDetails = 'Gemini API quota has been exceeded. Please check your API usage limits.';
-        } else if (error.message && error.message.includes('model') || error.message && error.message.includes('Model')) {
+        } else if (lastErrorMsg.includes('model') || lastErrorMsg.includes('Model') || lastErrorMsg.includes('MODEL_NOT_FOUND') || lastErrorMsg.includes('400')) {
             errorMessage = 'Invalid model name or model not accessible';
-            errorDetails = 'None of the tested models are available with your API key. Check the Gemini API documentation for current model names.';
-        } else if (error.message && error.message.includes('All models failed')) {
+            errorDetails = `None of the tested models (${modelsToTry.join(', ')}) are available with your API key. The last error was: ${lastErrorMsg}. Check the Gemini API documentation for current model names or try using the test harness to find a working model.`;
+        } else if (lastErrorMsg.includes('All models failed')) {
             errorMessage = 'All Gemini models failed';
-            errorDetails = error.message;
+            errorDetails = `${lastErrorMsg}. Models tried: ${modelsToTry.join(', ')}. Check Vercel function logs for detailed error messages.`;
+        } else if (lastErrorMsg.includes('403') || lastErrorMsg.includes('PERMISSION_DENIED')) {
+            errorMessage = 'Permission denied';
+            errorDetails = 'Your API key does not have permission to access Gemini models. Check your API key permissions in Google AI Studio.';
+        } else {
+            errorMessage = 'Failed to generate plan';
+            errorDetails = `Error: ${lastErrorMsg}. Check Vercel function logs for more details.`;
         }
         
         return res.status(500).json({ 
