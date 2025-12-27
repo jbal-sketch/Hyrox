@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Hyrox Training Plan</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .form-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .form-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--dark-bg);
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        .time-input {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .time-input input {
+            flex: 1;
+        }
+        .time-input span {
+            font-weight: bold;
+            color: #666;
+        }
+        .station-times {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        .station-time-group {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        .station-time-group label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .help-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.25rem;
+            font-style: italic;
+        }
+        .generate-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem 3rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            max-width: 500px;
+            margin: 2rem auto;
+            display: block;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        .required {
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">Hyrox Training Plan</h1>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="input.html" class="active">Create Plan</a></li>
+                <li><a href="training-plan.html">Training Plan</a></li>
+                <li><a href="nutrition.html">Nutrition</a></li>
+                <li><a href="race-analysis.html">Race Analysis</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="hero">
+            <h1>Create Your Personalized Hyrox Training Plan</h1>
+            <h2>Enter your details to generate a custom training plan</h2>
+        </header>
+
+        <form id="planForm">
+            <!-- Race Information -->
+            <section class="form-section">
+                <h2>Race Information</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="raceLocation">Race Location <span class="required">*</span></label>
+                        <input type="text" id="raceLocation" name="raceLocation" placeholder="e.g., Glasgow" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="raceDate">Race Date <span class="required">*</span></label>
+                        <input type="date" id="raceDate" name="raceDate" required>
+                        <script>
+                            // Set default date to 11 weeks from now
+                            const defaultDate = new Date();
+                            defaultDate.setDate(defaultDate.getDate() + 77); // 11 weeks
+                            document.getElementById('raceDate').value = defaultDate.toISOString().split('T')[0];
+                        </script>
+                    </div>
+                    <div class="form-group">
+                        <label for="raceCategory">Race Category <span class="required">*</span></label>
+                        <select id="raceCategory" name="raceCategory" required>
+                            <option value="womens-open">Women's Open</option>
+                            <option value="mens-open">Men's Open</option>
+                            <option value="womens-pro">Women's Pro</option>
+                            <option value="mens-pro">Men's Pro</option>
+                            <option value="mixed-doubles">Mixed Doubles</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Current Performance -->
+            <section class="form-section">
+                <h2>Current Performance</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="currentTime">Current Race Time <span class="required">*</span></label>
+                        <div class="time-input">
+                            <input type="number" id="currentTimeHour" name="currentTimeHour" placeholder="HH" min="0" max="3" value="1">
+                            <span>:</span>
+                            <input type="number" id="currentTimeMin" name="currentTimeMin" placeholder="MM" min="0" max="59" value="40" required>
+                            <span>:</span>
+                            <input type="number" id="currentTimeSec" name="currentTimeSec" placeholder="SS" min="0" max="59" value="32" required>
+                        </div>
+                        <div class="help-text">Format: HH:MM:SS (e.g., 1:40:32 = 1 hour, 40 minutes, 32 seconds)</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="current5K">Current 5K Time <span class="required">*</span></label>
+                        <div class="time-input">
+                            <input type="number" id="current5KMin" name="current5KMin" placeholder="MM" min="0" max="60" required>
+                            <span>:</span>
+                            <input type="number" id="current5KSec" name="current5KSec" placeholder="SS" min="0" max="59" required>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Target Goals -->
+            <section class="form-section">
+                <h2>Target Goals</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="targetTime">Target Race Time <span class="required">*</span></label>
+                        <div class="time-input">
+                            <input type="number" id="targetTimeHour" name="targetTimeHour" placeholder="HH" min="0" max="3" value="0">
+                            <span>:</span>
+                            <input type="number" id="targetTimeMin" name="targetTimeMin" placeholder="MM" min="0" max="59" value="90" required>
+                            <span>:</span>
+                            <input type="number" id="targetTimeSec" name="targetTimeSec" placeholder="SS" min="0" max="59" value="0" required>
+                        </div>
+                        <div class="help-text">Format: HH:MM:SS (e.g., 0:90:00 = 90 minutes)</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="target5K">Target 5K Time</label>
+                        <div class="time-input">
+                            <input type="number" id="target5KMin" name="target5KMin" placeholder="MM" min="0" max="60">
+                            <span>:</span>
+                            <input type="number" id="target5KSec" name="target5KSec" placeholder="SS" min="0" max="59">
+                        </div>
+                        <div class="help-text">Leave blank to auto-calculate</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Body Composition -->
+            <section class="form-section">
+                <h2>Body Composition</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="currentWeight">Current Weight (kg) <span class="required">*</span></label>
+                        <input type="number" id="currentWeight" name="currentWeight" step="0.1" min="30" max="200" placeholder="64" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="currentBodyFat">Current Body Fat (%) <span class="required">*</span></label>
+                        <input type="number" id="currentBodyFat" name="currentBodyFat" step="0.1" min="5" max="50" placeholder="29" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="targetWeight">Target Weight (kg)</label>
+                        <input type="number" id="targetWeight" name="targetWeight" step="0.1" min="30" max="200" placeholder="61">
+                        <div class="help-text">Leave blank if no weight goal</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="targetBodyFat">Target Body Fat (%)</label>
+                        <input type="number" id="targetBodyFat" name="targetBodyFat" step="0.1" min="5" max="50" placeholder="25">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Previous Race Station Times -->
+            <section class="form-section">
+                <h2>Previous Race Station Times (Optional)</h2>
+                <p style="margin-bottom: 1rem; color: #666;">Enter your previous race station times to get personalized improvement targets. Leave blank if this is your first race.</p>
+                <div class="station-times">
+                    <div class="station-time-group">
+                        <label for="skiErgTime">1000m SkiErg (MM:SS)</label>
+                        <div class="time-input">
+                            <input type="number" id="skiErgMin" name="skiErgMin" placeholder="MM" min="0" max="20">
+                            <span>:</span>
+                            <input type="number" id="skiErgSec" name="skiErgSec" placeholder="SS" min="0" max="59">
+                        </div>
+                    </div>
+                    <div class="station-time-group">
+                        <label for="sledPushTime">50m Sled Push (MM:SS)</label>
+                        <div class="time-input">
+                            <input type="number" id="sledPushMin" name="sledPushMin" placeholder="MM" min="0" max="10">
+                            <span>:</span>
+                            <input type="number" id="sledPushSec" name="sledPushSec" placeholder="SS" min="0" max="59">
+                        </div>
+                    </div>
+                    <div class="station-time-group">
+                        <label for="sledPullTime">50m Sled Pull (MM:SS)</label>
+                        <div class="time-input">
+                            <input type="number" id="sledPullMin" name="sledPullMin" placeholder="MM" min="0" max="10">
+                            <span>:</span>
+                            <input type="number" id="sledPullSec" name="sledPullSec" placeholder="SS" min="0" max="59">
+                        </div>
+                    </div>
+                    <div class="station-time-group">
+                        <label for="burpeeTime">80m Burpee Broad Jumps (MM:SS)</label>
+                        <div class="time-input">
+                            <input type="number" id="burpeeMin" name="burpeeMin" placeholder="MM" min="0" max="15">
+                            <span>:</span>
+                            <input type="number" id="burpeeSec" name="burpeeSec" placeholder="SS" min="0" max="59">
+                        </div>
+                    </div>
+                    <div class="station-time-group">
+                        <label for="rowTime">1000m Row (MM:SS)</label>
+                        <div class="time-input">
+                            <input type="number" id="rowMin" name="rowMin" placeholder="MM" min="0" max="10">
+                            <span>:</span>
+                            <input type="number" id="rowSec" name="rowSec" placeholder="SS" min="0" max="59">
+                        </div>
+                    </div>
+                    <div class="station-time-group">
+                        <label for="farmersTime">200m Farmers Carry (MM:SS)</label>
+                        <div class="time-input">
+                            <input type="number" id="farmersMin" name="farmersMin" placeholder="MM" min="0" max="5">
+                            <span>:</span>
+                            <input type="number" id="farmersSec" name="farmersSec" placeholder="SS" min="0" max="59">
+                        </div>
+                    </div>
+                    <div class="station-time-group">
+                        <label for="lungesTime">100m Sandbag Lunges (MM:SS)</label>
+                        <div class="time-input">
+                            <input type="number" id="lungesMin" name="lungesMin" placeholder="MM" min="0" max="10">
+                            <span>:</span>
+                            <input type="number" id="lungesSec" name="lungesSec" placeholder="SS" min="0" max="59">
+                        </div>
+                    </div>
+                    <div class="station-time-group">
+                        <label for="wallBallsTime">100 Wall Balls (MM:SS)</label>
+                        <div class="time-input">
+                            <input type="number" id="wallBallsMin" name="wallBallsMin" placeholder="MM" min="0" max="15">
+                            <span>:</span>
+                            <input type="number" id="wallBallsSec" name="wallBallsSec" placeholder="SS" min="0" max="59">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Training Schedule -->
+            <section class="form-section">
+                <h2>Training Schedule</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="runDays">Running Days per Week <span class="required">*</span></label>
+                        <input type="number" id="runDays" name="runDays" min="1" max="7" value="3" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="strengthDays">Strength Days per Week <span class="required">*</span></label>
+                        <input type="number" id="strengthDays" name="strengthDays" min="0" max="7" value="2" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gymDays">Gym/Hyrox Equipment Days per Week <span class="required">*</span></label>
+                        <input type="number" id="gymDays" name="gymDays" min="0" max="7" value="1" required>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Equipment Available -->
+            <section class="form-section">
+                <h2>Available Equipment</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" name="equipment" value="dumbbells" checked> Dumbbells
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" name="equipment" value="treadmill" checked> Treadmill
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" name="equipment" value="bench"> Bench
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" name="equipment" value="kettlebells"> Kettlebells
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" name="equipment" value="pullup-bar"> Pull-up Bar
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" name="equipment" value="barbell"> Barbell
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <button type="submit" class="generate-btn">Generate My Training Plan</button>
+        </form>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Hyrox Training Plan Generator</p>
+    </footer>
+
+    <script src="plan-generator.js"></script>
+</body>
+</html>
+
