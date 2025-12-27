@@ -41,28 +41,22 @@ module.exports = async (req, res) => {
         const genAI = new GoogleGenerativeAI(apiKey);
 
         // Get the Gemini model
-        // Current available models (as of 2024):
-        // - gemini-pro (original, may be deprecated)
-        // - gemini-1.5-flash (fast, recommended)
-        // - gemini-1.5-pro (may require special access)
-        // Try gemini-1.5-flash first, fallback to gemini-pro
-        let model;
-        let modelName = 'gemini-1.5-flash';
-        
-        try {
-            console.log('Trying model:', modelName);
-            model = genAI.getGenerativeModel({ 
-                model: modelName
-            });
-        } catch (e) {
-            console.log('Model not available, trying gemini-pro');
-            modelName = 'gemini-pro';
-            model = genAI.getGenerativeModel({ 
-                model: modelName
-            });
-        }
+        // Use gemini-pro as it's the most widely available model
+        // If your API key has access to newer models, you can set GEMINI_MODEL env var
+        const modelName = process.env.GEMINI_MODEL || 'gemini-pro';
         
         console.log('Using Gemini model:', modelName);
+        
+        let model;
+        try {
+            model = genAI.getGenerativeModel({ 
+                model: modelName
+            });
+        } catch (modelError) {
+            console.error('Model initialization error:', modelError);
+            // If the specified model fails, try to list available models
+            throw new Error(`Model "${modelName}" is not available. Please check your API key has access to this model, or try setting GEMINI_MODEL environment variable to a different model name.`);
+        }
 
         // System instruction for the AI
         const systemInstruction = `You are an expert Hyrox coach and training plan designer with deep knowledge of functional fitness, endurance training, and race-specific preparation. You create highly personalized, progressive training plans that help athletes achieve their Hyrox race goals.
@@ -113,9 +107,9 @@ Generate a complete, week-by-week Hyrox training plan in HTML format. The plan s
         } else if (error.message && error.message.includes('quota')) {
             errorMessage = 'API quota exceeded';
             errorDetails = 'Gemini API quota has been exceeded. Please check your API usage limits.';
-        } else if (error.message && error.message.includes('model')) {
-            errorMessage = 'Invalid model name';
-            errorDetails = 'The specified Gemini model may not be available. Try using gemini-1.5-pro or gemini-pro';
+        } else if (error.message && error.message.includes('model') || error.message && error.message.includes('Model')) {
+            errorMessage = 'Invalid model name or model not accessible';
+            errorDetails = `The model "${process.env.GEMINI_MODEL || 'gemini-pro'}" is not available with your API key. Your API key may need to be enabled for specific models, or the model name may have changed. Check the Gemini API documentation for current model names.`;
         }
         
         return res.status(500).json({ 
