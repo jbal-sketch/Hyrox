@@ -50,9 +50,9 @@ async function generatePlan() {
             parseInt(document.getElementById('target5KSec').value || 0)
         ),
         
-        // Body composition
-        currentWeight: parseFloat(document.getElementById('currentWeight').value),
-        currentBodyFat: parseFloat(document.getElementById('currentBodyFat').value),
+        // Body composition (optional)
+        currentWeight: document.getElementById('currentWeight').value ? parseFloat(document.getElementById('currentWeight').value) : null,
+        currentBodyFat: document.getElementById('currentBodyFat').value ? parseFloat(document.getElementById('currentBodyFat').value) : null,
         targetWeight: document.getElementById('targetWeight').value ? parseFloat(document.getElementById('targetWeight').value) : null,
         targetBodyFat: document.getElementById('targetBodyFat').value ? parseFloat(document.getElementById('targetBodyFat').value) : null,
         
