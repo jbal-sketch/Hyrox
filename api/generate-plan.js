@@ -40,18 +40,17 @@ module.exports = async (req, res) => {
         // Initialize Gemini AI
         const genAI = new GoogleGenerativeAI(apiKey);
 
-        // Get the Gemini model - try gemini-1.5-pro first, fallback to gemini-pro
-        let model;
-        try {
-            model = genAI.getGenerativeModel({ 
-                model: 'gemini-1.5-pro'
-            });
-        } catch (e) {
-            console.log('Falling back to gemini-pro');
-            model = genAI.getGenerativeModel({ 
-                model: 'gemini-pro'
-            });
-        }
+        // Get the Gemini model
+        // Available models: gemini-pro, gemini-1.5-flash, gemini-1.5-pro
+        // Using gemini-1.5-flash as it's faster and free tier friendly
+        // For better quality, use gemini-1.5-pro (may require API key with access)
+        const modelName = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+        
+        console.log('Using Gemini model:', modelName);
+        
+        const model = genAI.getGenerativeModel({ 
+            model: modelName
+        });
 
         // System instruction for the AI
         const systemInstruction = `You are an expert Hyrox coach and training plan designer with deep knowledge of functional fitness, endurance training, and race-specific preparation. You create highly personalized, progressive training plans that help athletes achieve their Hyrox race goals.
