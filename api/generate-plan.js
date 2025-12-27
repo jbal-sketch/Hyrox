@@ -41,21 +41,39 @@ module.exports = async (req, res) => {
         const genAI = new GoogleGenerativeAI(apiKey);
 
         // Get the Gemini model
-        // Use gemini-pro as it's the most widely available model
-        // If your API key has access to newer models, you can set GEMINI_MODEL env var
-        const modelName = process.env.GEMINI_MODEL || 'gemini-pro';
+        // Try multiple model names in order of preference
+        // Model names that should work: gemini-pro, gemini-1.5-flash, gemini-1.5-pro
+        const modelsToTry = [
+            process.env.GEMINI_MODEL, // User-specified model first
+            'gemini-1.5-flash',       // Fast and free tier friendly
+            'gemini-pro',             // Original model
+            'gemini-1.5-pro'          // Higher quality if available
+        ].filter(Boolean); // Remove undefined values
         
-        console.log('Using Gemini model:', modelName);
+        console.log('Trying models in order:', modelsToTry);
         
         let model;
-        try {
-            model = genAI.getGenerativeModel({ 
-                model: modelName
-            });
-        } catch (modelError) {
-            console.error('Model initialization error:', modelError);
-            // If the specified model fails, try to list available models
-            throw new Error(`Model "${modelName}" is not available. Please check your API key has access to this model, or try setting GEMINI_MODEL environment variable to a different model name.`);
+        let modelName;
+        let lastError;
+        
+        for (const testModelName of modelsToTry) {
+            try {
+                console.log(`Attempting to use model: ${testModelName}`);
+                model = genAI.getGenerativeModel({ 
+                    model: testModelName
+                });
+                modelName = testModelName;
+                console.log(`Successfully initialized model: ${modelName}`);
+                break;
+            } catch (modelError) {
+                console.log(`Model ${testModelName} failed:`, modelError.message);
+                lastError = modelError;
+                continue;
+            }
+        }
+        
+        if (!model) {
+            throw new Error(`None of the available models worked. Last error: ${lastError?.message || 'Unknown error'}. Please check your API key has access to Gemini models.`);
         }
 
         // System instruction for the AI
@@ -69,9 +87,12 @@ Generate a complete, week-by-week Hyrox training plan in HTML format. The plan s
         console.log('Generating plan with prompt length:', fullPrompt.length);
 
         // Generate content - Gemini API format
-        // The generateContent method can accept text directly or use the parts format
-        // Try the simpler text format first
-        const result = await model.generateContent(fullPrompt, {
+        // Use the standard format with contents array
+        const result = await model.generateContent({
+            contents: [{
+                role: 'user',
+                parts: [{ text: fullPrompt }]
+            }],
             generationConfig: {
                 temperature: 0.7,
                 topK: 40,
